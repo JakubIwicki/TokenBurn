@@ -1,0 +1,1 @@
+Elasticsearch-backed integration tests require the host precondition `vm.max_map_count=262144`; Testcontainers cannot set a host sysctl. Verify it with `sysctl vm.max_map_count` (this host reports 1048576, which satisfies it).

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><IsTestProject>true</IsTestProject></PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio"><PrivateAssets>all</PrivateAssets></PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="FluentAssertions" />
+    <ProjectReference Include="../../src/api.TokenBurn.Identity/api.TokenBurn.Identity.csproj" />
+    <ProjectReference Include="../../src/api.TokenBurn.Ingest/api.TokenBurn.Ingest.csproj" />
+    <ProjectReference Include="../../src/api.TokenBurn.Insights/api.TokenBurn.Insights.csproj" />
+    <ProjectReference Include="../../src/TokenBurn.Processor/TokenBurn.Processor.csproj" />
+    <ProjectReference Include="../../src/TokenBurn.Collector/TokenBurn.Collector.csproj" />
+  </ItemGroup>
+</Project>

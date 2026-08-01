@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><AssemblyName>TokenBurn.Collector</AssemblyName><RootNamespace>TokenBurn.Collector</RootNamespace></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../TokenBurn.Common/TokenBurn.Common.csproj" /></ItemGroup>
+</Project>

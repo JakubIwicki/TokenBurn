@@ -1,0 +1,23 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TokenBurn.Common/TokenBurn.Common.csproj" />
+    <Project Path="src/TokenBurn.Contracts/TokenBurn.Contracts.csproj" />
+    <Project Path="src/api.TokenBurn.Identity/api.TokenBurn.Identity.csproj" />
+    <Project Path="src/api.TokenBurn.Ingest/api.TokenBurn.Ingest.csproj" />
+    <Project Path="src/api.TokenBurn.Insights/api.TokenBurn.Insights.csproj" />
+    <Project Path="src/TokenBurn.Processor/TokenBurn.Processor.csproj" />
+    <Project Path="src/TokenBurn.Collector/TokenBurn.Collector.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TokenBurn.Testing.Common/TokenBurn.Testing.Common.csproj" />
+    <Project Path="tests/TokenBurn.Common.Tests/TokenBurn.Common.Tests.csproj" />
+    <Project Path="tests/TokenBurn.Contracts.Tests/TokenBurn.Contracts.Tests.csproj" />
+    <Project Path="tests/Api.TokenBurn.Identity.Tests/Api.TokenBurn.Identity.Tests.csproj" />
+    <Project Path="tests/Api.TokenBurn.Ingest.Tests/Api.TokenBurn.Ingest.Tests.csproj" />
+    <Project Path="tests/Api.TokenBurn.Insights.Tests/Api.TokenBurn.Insights.Tests.csproj" />
+    <Project Path="tests/TokenBurn.Processor.Tests/TokenBurn.Processor.Tests.csproj" />
+    <Project Path="tests/TokenBurn.Collector.Tests/TokenBurn.Collector.Tests.csproj" />
+    <Project Path="tests/TokenBurn.EndToEnd.Tests/TokenBurn.EndToEnd.Tests.csproj" />
+    <Project Path="tests/TokenBurn.ArchitectureTests/TokenBurn.ArchitectureTests.csproj" />
+  </Folder>
+</Solution>

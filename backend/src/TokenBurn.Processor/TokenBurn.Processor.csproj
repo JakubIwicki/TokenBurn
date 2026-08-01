@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup><OutputType>Exe</OutputType><AssemblyName>TokenBurn.Processor</AssemblyName><RootNamespace>TokenBurn.Processor</RootNamespace></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../TokenBurn.Common/TokenBurn.Common.csproj" /></ItemGroup>
+</Project>

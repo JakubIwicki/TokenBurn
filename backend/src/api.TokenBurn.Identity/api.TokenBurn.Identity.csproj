@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup><OutputType>Exe</OutputType><AssemblyName>api.TokenBurn.Identity</AssemblyName><RootNamespace>Api.TokenBurn.Identity</RootNamespace></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../TokenBurn.Common/TokenBurn.Common.csproj" />
+    <ProjectReference Include="../TokenBurn.Contracts/TokenBurn.Contracts.csproj" /></ItemGroup>
+</Project>

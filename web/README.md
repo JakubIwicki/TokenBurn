@@ -1,0 +1,1 @@
+This is the TokenBurn web frontend. The `(public)` route group is the anonymous SEO surface; the `(app)` route group is the authenticated dashboard.
