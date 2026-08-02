@@ -18,4 +18,9 @@ TestResults/
 *.received.*
 .DS_Store
 *.received.txt
-/.claude/worktrees/
+.claude/
+CLAUDE.md
+.mcp.json
+docs/
+PLAN.md
+PROCESS.md
