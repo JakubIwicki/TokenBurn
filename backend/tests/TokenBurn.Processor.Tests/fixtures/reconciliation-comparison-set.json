@@ -1,0 +1,1340 @@
+[
+  {
+    "session_id": "004361d7-c20b-4850-b7ed-054734d759cc",
+    "agent_id": "20260724-235751-1347702-c997b7",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0035564984000000005
+  },
+  {
+    "session_id": "00e942db-e64f-4e9e-99d9-f89c8d96d78b",
+    "agent_id": "20260802-172829-491893-604e35",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.051770149999999994
+  },
+  {
+    "session_id": "0211e1e6-856a-4b0f-be0a-bcad3c29d568",
+    "agent_id": "20260802-174502-491893-0cd0fe",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.06846155500000001
+  },
+  {
+    "session_id": "0432f824-ab5e-462f-b8bc-b482892504a7",
+    "agent_id": "20260803-201155-73726-d45db4",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0042535192
+  },
+  {
+    "session_id": "06e88902-067f-4f9e-a46e-22621fe7f236",
+    "agent_id": "20260803-204531-71474-c6a575",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.04775886640000001
+  },
+  {
+    "session_id": "07e0b3aa-93c0-46fa-9867-43c4f70709d0",
+    "agent_id": "20260802-224333-1563702-4ff627",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.010142076000000002
+  },
+  {
+    "session_id": "07f7c08b-7e65-4baf-a478-aedd9c60b926",
+    "agent_id": "20260803-201324-73726-945524",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.020515286400000003
+  },
+  {
+    "session_id": "08880b33-ba5b-485e-b5cc-a60b6db1992a",
+    "agent_id": "20260720-153430-285527-cec786",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0033975704000000005
+  },
+  {
+    "session_id": "09ddfff9-a75b-41dc-8e02-0b6d755fb788",
+    "agent_id": "20260803-205816-226166-4a7ae5",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0076737696000000015
+  },
+  {
+    "session_id": "0b1cb031-3af0-4b60-80a9-9c341b6f2189",
+    "agent_id": "20260729-184820-104964-25c465",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0172328352
+  },
+  {
+    "session_id": "0b572635-8088-4da7-b469-33b7662d17b3",
+    "agent_id": "20260801-213309-162459-cb59bb",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.031431764
+  },
+  {
+    "session_id": "0df367bb-8327-4d8b-b632-b478eb42c93a",
+    "agent_id": "20260721-164845-155887-ee9644",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0030397696
+  },
+  {
+    "session_id": "10a8a399-f4a2-4b96-9c02-974c5b1077a6",
+    "agent_id": "20260803-174558-73726-06e50b",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0150417456
+  },
+  {
+    "session_id": "10c09c17-5967-44fe-8c13-c58259a3304f",
+    "agent_id": "20260802-150923-82222-963794",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.025132160000000004
+  },
+  {
+    "session_id": "11197bfa-4db6-4cf0-a821-d06552ed2d72",
+    "agent_id": "20260802-220719-1563702-e3503b",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0028086239999999996
+  },
+  {
+    "session_id": "12b1bde9-f9d7-4e0f-bbd1-8e73cddfad5a",
+    "agent_id": "20260802-195015-491893-ad915a",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.01547517
+  },
+  {
+    "session_id": "12d91f36-2c14-4716-a444-cc6f01f4e71c",
+    "agent_id": "20260729-185218-104964-91990e",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0050575728
+  },
+  {
+    "session_id": "1517a5f3-41ad-43ef-928a-71e8f13482a0",
+    "agent_id": "20260801-190607-124245-50d595",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0213407656
+  },
+  {
+    "session_id": "158c1c6f-47a8-4b48-badd-3e4fbe532055",
+    "agent_id": "20260802-154801-1049-1a6b7f",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.029574434400000002
+  },
+  {
+    "session_id": "16c5ca4c-9cb3-45cb-9297-bc9f085781fe",
+    "agent_id": "20260802-154227-117514-6c1aae",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.007491176000000001
+  },
+  {
+    "session_id": "16eb9f23-9be4-48b5-a9e0-d01e11ba4d08",
+    "agent_id": "20260724-144324-1062767-3cdef6",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0029166424000000002
+  },
+  {
+    "session_id": "172b10ff-4132-4113-9c3f-97ce467b64a1",
+    "agent_id": "20260803-200528-226166-d1a9d1",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0320955096
+  },
+  {
+    "session_id": "174b8c1d-8d54-4523-ba59-34575460e253",
+    "agent_id": "20260729-214629-208257-ba6e04",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0051509696
+  },
+  {
+    "session_id": "17dcd011-d296-46b5-b88c-62adfcd03253",
+    "agent_id": "20260726-161100-411258-3afac9",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0029088080000000006
+  },
+  {
+    "session_id": "19d2cdd7-54f9-40c3-b3b8-9e033ab3d5fb",
+    "agent_id": "20260726-124803-411258-0cc62b",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.008201928000000002
+  },
+  {
+    "session_id": "1c3d2419-0bcf-48cb-b8a5-77ce4dcaff8b",
+    "agent_id": "20260803-192532-71474-b59c9d",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0458276224
+  },
+  {
+    "session_id": "1ccd41f5-201c-44a0-8b77-4952bb68f5b1",
+    "agent_id": "20260803-222408-226166-8a3b17",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0036048320000000005
+  },
+  {
+    "session_id": "1d7b4c04-beff-4f08-b011-8c208ad6d601",
+    "agent_id": "20260802-215215-1563702-597961",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.02223522
+  },
+  {
+    "session_id": "1ec709cd-812e-40a3-90b2-a915a444f21b",
+    "agent_id": "20260803-195712-226166-1fba1d",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0288464064
+  },
+  {
+    "session_id": "1ee98c4a-eb2f-4788-89be-72592105fcbc",
+    "agent_id": "20260802-132804-1049-b5e46f",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.014480875
+  },
+  {
+    "session_id": "1fdf392d-5e6c-4f72-8bd6-a3c89f314127",
+    "agent_id": "20260731-154546-11932-253dfa",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.0
+  },
+  {
+    "session_id": "21894455-2247-4b86-8b92-83c98f827f45",
+    "agent_id": "20260724-230217-1347702-68a420",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.006688836
+  },
+  {
+    "session_id": "2242f12f-2d08-4abc-bc57-f85afd393a00",
+    "agent_id": "20260802-215122-1563702-e2c11d",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.006002511200000001
+  },
+  {
+    "session_id": "25978c47-470e-4574-ac16-ab0377bf401d",
+    "agent_id": "20260804-115943-9402-2e9eac",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.011533312000000002
+  },
+  {
+    "session_id": "27ff947e-8a93-41e5-8b46-675fe8d587b4",
+    "agent_id": "20260803-215800-420437-ba29bf",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0181093696
+  },
+  {
+    "session_id": "28fb0abc-db55-4606-82b2-8c698b65f4b5",
+    "agent_id": "20260724-145104-1062767-9da5f7",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0114463888
+  },
+  {
+    "session_id": "29d9aeb4-4961-4447-a195-4386f5a37f08",
+    "agent_id": "20260803-223057-575380-3e84fa",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0231228368
+  },
+  {
+    "session_id": "2a03cf1d-4feb-468d-9c9c-fc4da60d7197",
+    "agent_id": "20260803-193016-73726-550d42",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.07433882960000002
+  },
+  {
+    "session_id": "2a7590f7-3e59-485f-a9d2-08ccbf460d1a",
+    "agent_id": "20260802-150556-82222-a50447",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.015304755000000001
+  },
+  {
+    "session_id": "2c159a2f-72c9-4058-8e6b-5e39805a5efb",
+    "agent_id": "20260802-195502-491893-131c5b",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.02522809
+  },
+  {
+    "session_id": "2c159a2f-72c9-4058-8e6b-5e39805a5efb",
+    "agent_id": "20260802-200621-491893-a79ea9",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.007088775
+  },
+  {
+    "session_id": "2cc5242c-c062-4685-adf5-d4c03ccfd325",
+    "agent_id": "20260803-195718-226166-b38771",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0339378368
+  },
+  {
+    "session_id": "2df4c721-03c7-4ffd-b9f5-78906cbe16d5",
+    "agent_id": "20260727-161150-57413-c93b4a",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0086226392
+  },
+  {
+    "session_id": "30130b42-1686-4d3f-98c6-982b4cad49fa",
+    "agent_id": "20260804-114854-9999-d4d516",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.21694316000000002
+  },
+  {
+    "session_id": "30e30afb-077c-4d54-9c53-ae6603202f40",
+    "agent_id": "20260802-132955-1049-0823a6",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.009049335
+  },
+  {
+    "session_id": "317f6275-3a05-47e6-b4aa-87fbe7ee0833",
+    "agent_id": "20260723-213205-318664-014ec0",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.004456821600000001
+  },
+  {
+    "session_id": "3346d61f-84af-44c0-a644-ff7c4ec48918",
+    "agent_id": "20260802-152820-117514-6fbab0",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.00353094
+  },
+  {
+    "session_id": "33b4b803-dee5-4665-a8a9-9d284754243b",
+    "agent_id": "20260723-222910-588292-2bc8d9",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0028539056
+  },
+  {
+    "session_id": "34cf0640-93fa-4eb1-b028-f65101e1fce1",
+    "agent_id": "20260727-124836-57413-6c7905",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0104528368
+  },
+  {
+    "session_id": "370bcc2e-35b4-4b33-9f6a-73db090154f8",
+    "agent_id": "20260802-145430-1049-cd9bb8",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.00855029
+  },
+  {
+    "session_id": "38d00dfb-e451-4485-b748-4e318baa6cd2",
+    "agent_id": "20260802-161239-117514-8793cf",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0076273736
+  },
+  {
+    "session_id": "39c80114-1e1e-4dbb-a06a-1ed15df3af6b",
+    "agent_id": "20260726-123604-411258-8a96cf",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.007137648
+  },
+  {
+    "session_id": "3a24f366-9d75-4431-9213-cdea7c34755a",
+    "agent_id": "20260721-143134-2660-506ee9",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0103794768
+  },
+  {
+    "session_id": "3a593e0a-ab03-4d91-8f4c-67ff0a8db893",
+    "agent_id": "20260723-223758-588292-8a57c5",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0019730088
+  },
+  {
+    "session_id": "3b8bb2f7-dd3f-4842-8bda-143fee262b45",
+    "agent_id": "20260801-194355-129210-985e9b",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.04466534240000001
+  },
+  {
+    "session_id": "3c18572e-cecf-44b1-b086-128eb38592fe",
+    "agent_id": "20260803-222040-406017-9ed212",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0201697608
+  },
+  {
+    "session_id": "3c661778-5d02-4c68-b2c6-8859a7a7e22d",
+    "agent_id": "20260730-215021-18518-e30d43",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.007590021600000001
+  },
+  {
+    "session_id": "3c6fdb14-9c85-42f2-8c27-3300e772bc87",
+    "agent_id": "20260801-210852-129210-237c4f",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.11550025760000002
+  },
+  {
+    "session_id": "3cce0839-a276-428e-a41a-edf5dc6de5ec",
+    "agent_id": "20260803-210045-71474-d4466a",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.044626344000000005
+  },
+  {
+    "session_id": "3deabac7-076b-487d-91ca-e7696ec39e9e",
+    "agent_id": "20260722-223041-15649-29fc11",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.004033741600000001
+  },
+  {
+    "session_id": "3ef21f7a-8695-4a0a-b85e-5093643e8149",
+    "agent_id": "20260722-170624-3496-aaac3e",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0019387872000000003
+  },
+  {
+    "session_id": "3fd641ff-7609-48d2-b055-58807c17f142",
+    "agent_id": "20260803-191025-73726-8da424",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0143957408
+  },
+  {
+    "session_id": "3fe36c11-ec80-414a-a63f-9d9ce70760fe",
+    "agent_id": "20260802-121920-1049-47679f",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.01877628
+  },
+  {
+    "session_id": "42a29a8b-5bfb-4a63-a88b-e76b813e355b",
+    "agent_id": "20260802-152150-117514-01ef38",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.020360425
+  },
+  {
+    "session_id": "457a5852-ca86-40a0-b88c-ec1178a4bacc",
+    "agent_id": "20260803-201707-226166-3bfd93",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.106586284
+  },
+  {
+    "session_id": "457a5852-ca86-40a0-b88c-ec1178a4bacc",
+    "agent_id": "20260803-205009-226166-2be2a9",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0562609432
+  },
+  {
+    "session_id": "476cf8bd-ed14-4e18-9f6a-298fa87eb0cf",
+    "agent_id": "20260721-143543-2660-67c9ff",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0027562584000000003
+  },
+  {
+    "session_id": "47e2f345-5ccc-401b-b857-3b5c74387e89",
+    "agent_id": "20260724-151640-1119984-d2b5c9",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0027052760000000004
+  },
+  {
+    "session_id": "4896583a-2f4e-4984-8c1e-ac013c1e74fc",
+    "agent_id": "20260801-213244-162459-75411b",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0815609088
+  },
+  {
+    "session_id": "49265452-d606-4623-8f79-1ba72fa48294",
+    "agent_id": "20260802-114511-1049-31e0a7",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.019477245000000004
+  },
+  {
+    "session_id": "4980c17f-5602-487c-bebc-b66477a66052",
+    "agent_id": "20260803-211750-420437-d1b773",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.037014443200000004
+  },
+  {
+    "session_id": "4cee1322-c8e6-44f6-b1d2-21f81b7f80b9",
+    "agent_id": "20260802-123117-1049-280c72",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.0021198099999999998
+  },
+  {
+    "session_id": "4e6920ff-e0d5-4740-8b62-b8d69c79aad2",
+    "agent_id": "20260801-205729-129210-adc15d",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0297215912
+  },
+  {
+    "session_id": "4eb68833-7975-4b76-9c1f-8e4dc88d4e73",
+    "agent_id": "20260804-120932-9402-e2fc7a",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.006343103199999999
+  },
+  {
+    "session_id": "4f21d3dd-3d83-47d6-b45d-e82b0b48bb77",
+    "agent_id": "20260803-173926-73726-83cebb",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0406078232
+  },
+  {
+    "session_id": "4feb44cd-0c87-4980-b9f0-9b3a30129f29",
+    "agent_id": "20260802-151841-1049-e5bf92",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.023413065
+  },
+  {
+    "session_id": "51c56075-6866-4f14-a329-2178869765a8",
+    "agent_id": "20260802-215851-1563702-ee848f",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.019490503200000002
+  },
+  {
+    "session_id": "54689d98-62f7-4cd8-aced-30fdf14b363d",
+    "agent_id": "20260801-190421-124245-1609bd",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.030035768
+  },
+  {
+    "session_id": "54ed0af7-20c8-4f43-8b00-160bdcaa699b",
+    "agent_id": "20260725-000433-1347702-f0e57d",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0017919272
+  },
+  {
+    "session_id": "5600b980-ae31-4423-9471-f5f9ce96019c",
+    "agent_id": "20260728-124340-13181-ff160d",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0085263136
+  },
+  {
+    "session_id": "5778fa94-376d-49ee-b9f9-b38b5f51d448",
+    "agent_id": "20260802-171824-491893-d6c883",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.016177448
+  },
+  {
+    "session_id": "594402df-0914-4b5a-ae24-344c20e40288",
+    "agent_id": "20260804-120930-9402-2629ce",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0115130232
+  },
+  {
+    "session_id": "59aef72e-0cdc-4ca5-a318-f4746c8e9973",
+    "agent_id": "20260724-132010-927108-d1e321",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0066107832
+  },
+  {
+    "session_id": "5aa5038b-3ff8-49d1-82eb-f94ff6490574",
+    "agent_id": "20260802-175752-491893-00a733",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.08927033999999999
+  },
+  {
+    "session_id": "5deea966-3284-4289-9e79-7ed8be70497e",
+    "agent_id": "20260803-194107-73726-491046",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.014031404800000003
+  },
+  {
+    "session_id": "5eb27018-ae25-419b-b7a9-019765f896bc",
+    "agent_id": "20260803-215157-406017-338ffc",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0155742552
+  },
+  {
+    "session_id": "648dc901-0781-4fbb-a144-a304afac5008",
+    "agent_id": "20260803-214640-406017-f5cf83",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0054474504000000005
+  },
+  {
+    "session_id": "64f63710-9d41-43e2-9c20-4e3cb783e5c2",
+    "agent_id": "20260802-153301-1049-5e5729",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.00777748
+  },
+  {
+    "session_id": "6634df2b-349e-420e-a7d6-c44e93092e04",
+    "agent_id": "20260802-150528-82222-1afe92",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.0038744750000000005
+  },
+  {
+    "session_id": "67410512-31ad-4e22-ac67-799e8eb4a1b0",
+    "agent_id": "20260803-201701-226166-632135",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.11721179680000002
+  },
+  {
+    "session_id": "67410512-31ad-4e22-ac67-799e8eb4a1b0",
+    "agent_id": "20260803-203441-226166-5736ec",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.041069033600000006
+  },
+  {
+    "session_id": "67410512-31ad-4e22-ac67-799e8eb4a1b0",
+    "agent_id": "20260803-203836-226166-b6913e",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.006001139200000001
+  },
+  {
+    "session_id": "67410512-31ad-4e22-ac67-799e8eb4a1b0",
+    "agent_id": "20260803-204843-226166-dd7217",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.05853574160000001
+  },
+  {
+    "session_id": "68439fcd-3adf-4f2e-85a8-bfa8a0d6dea1",
+    "agent_id": "20260802-150605-82222-3079e7",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.009886240000000001
+  },
+  {
+    "session_id": "6871ca94-898e-4b5c-b3ae-c88c26e616b7",
+    "agent_id": "20260723-223626-588292-76badc",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.00273798
+  },
+  {
+    "session_id": "6b60cbe2-ef6b-48dd-b68a-b6b7eccc823f",
+    "agent_id": "20260803-214139-420437-e80d2d",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.025019170400000002
+  },
+  {
+    "session_id": "6b7b19b9-e6a2-4c26-b3d1-c87278280280",
+    "agent_id": "20260801-210738-129210-3c9c97",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0045564568
+  },
+  {
+    "session_id": "6bc6df40-d750-40c4-ae6e-c75aa7ea4b64",
+    "agent_id": "20260731-214744-454303-d0210b",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0132910288
+  },
+  {
+    "session_id": "6dcd469b-7538-4d24-9fc4-fcb3bf06e460",
+    "agent_id": "20260720-203501-285527-a34380",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.005968788
+  },
+  {
+    "session_id": "706ae1d2-c9b1-4174-86d1-91bf12ee6948",
+    "agent_id": "20260803-222207-226166-ab0e58",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0097062168
+  },
+  {
+    "session_id": "735ef321-7f7c-4706-b53e-1b2dfc254d48",
+    "agent_id": "20260803-222901-575380-300684",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.03528262640000001
+  },
+  {
+    "session_id": "76576f53-e81f-44d0-9b09-02241c419810",
+    "agent_id": "20260802-122142-1049-8a6db4",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.02092647
+  },
+  {
+    "session_id": "76d087a4-0b51-4c7d-a7cb-787d958033fc",
+    "agent_id": "20260802-150103-1049-6f4b5f",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.013417390000000001
+  },
+  {
+    "session_id": "7779949e-1bbd-445f-8529-385795a1e8dc",
+    "agent_id": "20260802-183527-491893-2c6703",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.07179756500000001
+  },
+  {
+    "session_id": "7779949e-1bbd-445f-8529-385795a1e8dc",
+    "agent_id": "20260802-184921-491893-293733",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.06203152000000001
+  },
+  {
+    "session_id": "7779949e-1bbd-445f-8529-385795a1e8dc",
+    "agent_id": "20260802-190651-491893-83f283",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.01850158
+  },
+  {
+    "session_id": "779ae06b-5ed7-44af-b6f5-c1c46f269399",
+    "agent_id": "20260720-150119-200362-2350ee",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0054203352
+  },
+  {
+    "session_id": "7a576b21-47c5-4f45-ad50-22da31191b61",
+    "agent_id": "20260801-201958-139297-7558ed",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0169002008
+  },
+  {
+    "session_id": "7b6ca7e9-1239-41ad-8a8c-e1c9adfa98aa",
+    "agent_id": "20260723-204058-318664-40de6e",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.008824088
+  },
+  {
+    "session_id": "7c150f93-cca8-4477-92ef-21fc98bacbef",
+    "agent_id": "20260802-152236-117514-b38282",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.00555896
+  },
+  {
+    "session_id": "7e53127d-c4a0-415a-9523-cb6f194d5bf4",
+    "agent_id": "20260801-201227-129210-e51723",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0286938848
+  },
+  {
+    "session_id": "7f0ef2f6-755f-44fe-ade9-3d785b93aadd",
+    "agent_id": "20260804-125922-1133-123d58",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.040803604800000004
+  },
+  {
+    "session_id": "7f1cf284-9769-47a6-a015-e9d9fe4661e8",
+    "agent_id": "20260802-150717-82222-2817c2",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.087430405
+  },
+  {
+    "session_id": "7f212d25-2bcb-4c50-b6fc-9424bab877f8",
+    "agent_id": "20260802-171236-117514-0e3077",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0039635568
+  },
+  {
+    "session_id": "810fc53f-a92f-4a17-9f19-b00dcd5d7348",
+    "agent_id": "20260803-221016-406017-86af2f",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.009316921600000002
+  },
+  {
+    "session_id": "814269ba-89fc-4157-a7e1-358499cd596d",
+    "agent_id": "20260801-201808-129210-eda2e4",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.1523502512
+  },
+  {
+    "session_id": "817e50d1-5863-4d95-bbf4-349bd98680bd",
+    "agent_id": "20260725-233103-1058-7f9539",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0088870936
+  },
+  {
+    "session_id": "837de389-d7e2-4b9b-9adf-fdff568fc552",
+    "agent_id": "20260801-204849-129210-71aebc",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.03598801919999999
+  },
+  {
+    "session_id": "83fe0761-c68c-4e87-a240-05ac8dc99c26",
+    "agent_id": "20260802-222208-1563702-552af7",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0059338664000000005
+  },
+  {
+    "session_id": "8563e4a7-f7dc-4681-9342-e40482faf402",
+    "agent_id": "20260802-215408-1586748-8399b5",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.011875141600000002
+  },
+  {
+    "session_id": "8563e4a7-f7dc-4681-9342-e40482faf402",
+    "agent_id": "20260802-215521-1586748-a7d8e0",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.007915432
+  },
+  {
+    "session_id": "85fce663-41cb-4b39-a2c3-aa1bfa127b41",
+    "agent_id": "20260803-194331-71474-1344c7",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.35147460880000003
+  },
+  {
+    "session_id": "869092b7-4a02-434b-be90-7c45d1cdd49f",
+    "agent_id": "20260802-121541-1049-ae0dac",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.00518088
+  },
+  {
+    "session_id": "887bf491-d440-4073-b9c9-56bd679ff80f",
+    "agent_id": "20260804-122016-9402-c92229",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.006185676
+  },
+  {
+    "session_id": "88b64b20-2ebf-4c17-a883-ddb1109b3365",
+    "agent_id": "20260804-125106-9402-c57108",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.038423050400000006
+  },
+  {
+    "session_id": "8a303c0a-1f01-4a45-b007-9fb9427233cc",
+    "agent_id": "20260724-201520-1119984-05caf6",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.005658514400000001
+  },
+  {
+    "session_id": "8a560246-4af5-4b97-b740-0205cec3866f",
+    "agent_id": "20260802-153919-117514-741c3d",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0755108872
+  },
+  {
+    "session_id": "8a560246-4af5-4b97-b740-0205cec3866f",
+    "agent_id": "20260802-160248-117514-5859c0",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.029673151200000004
+  },
+  {
+    "session_id": "8c57db08-831e-4a91-a131-be7f12b68c12",
+    "agent_id": "20260729-171446-104964-e6b5ea",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.006951929600000001
+  },
+  {
+    "session_id": "8cececdb-37f1-4e6e-9afa-7ff082742d4a",
+    "agent_id": "20260802-154004-1049-b209f0",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.00287915
+  },
+  {
+    "session_id": "8d421181-53c2-42cc-9ce8-8bcd70075fe2",
+    "agent_id": "20260801-201227-129210-40747d",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0296468704
+  },
+  {
+    "session_id": "8dbda172-47cb-4104-bc04-7275f6620de6",
+    "agent_id": "20260802-144855-1049-b1dd18",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0092732752
+  },
+  {
+    "session_id": "8e8f03c8-888e-4f5e-8d1b-243ba883d518",
+    "agent_id": "20260803-153819-1123-87dc2f",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.034131199200000004
+  },
+  {
+    "session_id": "8f3a54b0-f9c9-4671-a2af-0a355d635abb",
+    "agent_id": "20260803-211602-226166-02f794",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.017444218400000003
+  },
+  {
+    "session_id": "913e1795-7a20-471a-8bc2-f628682a8544",
+    "agent_id": "20260802-130418-1049-240f98",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.023637210000000002
+  },
+  {
+    "session_id": "91a9311f-3090-4a41-8fa3-24701f9af059",
+    "agent_id": "20260802-154830-117514-d827ce",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.004787529600000001
+  },
+  {
+    "session_id": "94a31656-28e2-4794-ad6c-949a1a8b6d5b",
+    "agent_id": "20260804-130342-9999-fd71fa",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0085087464
+  },
+  {
+    "session_id": "95c5c0f7-f17d-450c-b03f-93acb899ecd6",
+    "agent_id": "20260803-204554-420437-45dae2",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.015239526400000002
+  },
+  {
+    "session_id": "9a58491a-c808-41d2-a25a-fe1a24614136",
+    "agent_id": "20260803-170051-1123-619808",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.012909310400000002
+  },
+  {
+    "session_id": "9ba593fb-f4d3-46fd-a524-04cc7082124d",
+    "agent_id": "20260803-222552-71474-204dca",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0079759344
+  },
+  {
+    "session_id": "9cd7d3fa-d2ff-4e97-9cda-3604e1d03001",
+    "agent_id": "20260802-225004-1563702-8e3b38",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0034371455999999997
+  },
+  {
+    "session_id": "9e18e797-b415-4659-b608-8ba4e8fea9fa",
+    "agent_id": "20260803-172439-73726-749bbe",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.018450969600000006
+  },
+  {
+    "session_id": "9ed55fd5-9d9d-4d74-957e-5e5621594d24",
+    "agent_id": "20260803-202850-71474-5b6b53",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.08633190160000001
+  },
+  {
+    "session_id": "a030e36a-d316-40e8-a0fa-d63a9a73c329",
+    "agent_id": "20260803-103851-1123-f510d2",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.0
+  },
+  {
+    "session_id": "a13ff5b9-ee09-4109-985b-205e54488f93",
+    "agent_id": "20260722-225407-1078122-1f52d5",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0047690664
+  },
+  {
+    "session_id": "a1b1fa3e-1206-44bc-9e74-af254abc3705",
+    "agent_id": "20260803-182838-71474-07d062",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.06832507920000001
+  },
+  {
+    "session_id": "a379fe3c-d7fb-4782-b2cc-c60d077ea9de",
+    "agent_id": "20260801-191931-129210-5712c6",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0312570608
+  },
+  {
+    "session_id": "a4577ee6-62b1-4cae-aa28-a16f0499721a",
+    "agent_id": "20260803-143340-1123-871f26",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.010792387200000001
+  },
+  {
+    "session_id": "a4c0ea82-2728-42f3-af77-076049806623",
+    "agent_id": "20260802-200852-491893-55738c",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.010358850000000003
+  },
+  {
+    "session_id": "a57ddd12-bf5a-493b-962a-68d4cf654839",
+    "agent_id": "20260727-123544-57413-69a69d",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.006176066399999999
+  },
+  {
+    "session_id": "a641be76-1360-46e9-b55a-c284681a7474",
+    "agent_id": "20260802-210158-491893-a3b215",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.1311309944
+  },
+  {
+    "session_id": "a6dc89d8-e720-4b0c-9f6f-bf2f69dacd81",
+    "agent_id": "20260803-182722-73726-d8c3c6",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0122437784
+  },
+  {
+    "session_id": "a7623db3-fd22-42e0-b0d7-366ad2271b90",
+    "agent_id": "20260802-131642-1049-74df55",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.040425985
+  },
+  {
+    "session_id": "a7ac3983-6db6-404c-8f0e-59f30c1f5f42",
+    "agent_id": "20260731-211010-439415-45b2a8",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0077132272000000005
+  },
+  {
+    "session_id": "a82e70f6-97cd-4360-9b62-db909b40e2f7",
+    "agent_id": "20260801-201808-129210-e316c8",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.3078885208
+  },
+  {
+    "session_id": "a82e70f6-97cd-4360-9b62-db909b40e2f7",
+    "agent_id": "20260801-205757-129210-b00a2b",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.09761507840000001
+  },
+  {
+    "session_id": "ac3c8679-cd85-4a6e-afcf-e9fbf0e657e0",
+    "agent_id": "20260802-124152-1049-cd9738",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.035534510000000005
+  },
+  {
+    "session_id": "ae3557a0-c49c-4af8-afd2-4e53595d8f88",
+    "agent_id": "20260802-130909-1049-c6bea1",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.008748174999999999
+  },
+  {
+    "session_id": "ae38b599-514a-4d9d-b838-d0d2772b9aeb",
+    "agent_id": "20260803-173939-71474-060196",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.8220909872000001
+  },
+  {
+    "session_id": "b11fac3a-ac0c-4fa9-9316-4086fd45bbc0",
+    "agent_id": "20260727-001459-1452558-d55171",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.013901876800000003
+  },
+  {
+    "session_id": "b1330773-dc3f-4f2d-87e0-94e024d6ade8",
+    "agent_id": "20260803-212700-406017-31f11b",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.015322087200000003
+  },
+  {
+    "session_id": "b193e603-c6de-4467-8f34-a98d1509cced",
+    "agent_id": "20260803-182323-73726-66b190",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0190250704
+  },
+  {
+    "session_id": "b1d4fa13-7c7f-4ad5-a935-c1b4c4c3dd8d",
+    "agent_id": "20260720-130116-200362-902cb5",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0030048032000000004
+  },
+  {
+    "session_id": "b2de2249-aa82-47df-b6a7-2afa3f969671",
+    "agent_id": "20260731-152834-11932-82f3fa",
+    "model_slug": "luna",
+    "reported_cost_usd": 0.0
+  },
+  {
+    "session_id": "b3d1813c-3ed6-42bb-b459-7460084392f8",
+    "agent_id": "20260802-183524-798646-b6c7d9",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.005356960000000001
+  },
+  {
+    "session_id": "b40c6b47-588f-4121-8a5d-5b3fb417f7db",
+    "agent_id": "20260802-155407-117514-9a418a",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0125703592
+  },
+  {
+    "session_id": "b5f236b9-22a0-4c01-9447-968914dad228",
+    "agent_id": "20260803-191720-73726-964828",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0779772896
+  },
+  {
+    "session_id": "b65f30f9-256d-467e-9e62-dc5860d4b1bb",
+    "agent_id": "20260803-204847-406017-0d4c87",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0651245896
+  },
+  {
+    "session_id": "b6731b0a-b5e7-43e9-96e1-1db048c7dde5",
+    "agent_id": "20260801-202121-129210-44d980",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0436699648
+  },
+  {
+    "session_id": "b9bf1a8d-cad1-4e89-8f46-3461607c843b",
+    "agent_id": "20260801-215103-162459-82d1e5",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.006079001600000001
+  },
+  {
+    "session_id": "ba2693d4-972b-419a-9d4e-c05122c4af7b",
+    "agent_id": "20260802-122659-1049-195303",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.01542639
+  },
+  {
+    "session_id": "bbb7a327-370a-48c1-8e4e-e61a97608a61",
+    "agent_id": "20260803-145751-1123-a14511",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.146508712
+  },
+  {
+    "session_id": "bd6dedba-7aec-4af6-88b7-862e97a68722",
+    "agent_id": "20260803-195717-226166-b4c288",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.013358542400000003
+  },
+  {
+    "session_id": "be049180-908c-4e14-badf-2287720b4f8b",
+    "agent_id": "20260731-154513-11932-20a5d7",
+    "model_slug": "luna",
+    "reported_cost_usd": 0.0
+  },
+  {
+    "session_id": "be9200ea-cc3c-4989-9e89-16c9ff61c523",
+    "agent_id": "20260802-201642-491893-d0c5a7",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.014576497600000002
+  },
+  {
+    "session_id": "be99756f-931d-425e-9fc4-ce1a0667338e",
+    "agent_id": "20260720-183720-285527-03ac8f",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.005267236800000001
+  },
+  {
+    "session_id": "c1b196c4-0e7c-4bc6-b5e8-81b8083924b0",
+    "agent_id": "20260803-153200-1123-7c8140",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0347869592
+  },
+  {
+    "session_id": "c3de2e5f-7351-423e-99f6-03fb47c56300",
+    "agent_id": "20260801-201957-139297-84926b",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0121480408
+  },
+  {
+    "session_id": "c51f78f2-6808-46b8-b720-e4c96be8e9c7",
+    "agent_id": "20260726-234424-1452558-5b25d1",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.015492092
+  },
+  {
+    "session_id": "c7ca8087-8c9d-4099-adde-fa46684b4ab7",
+    "agent_id": "20260803-211558-226166-2a5e52",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0676242392
+  },
+  {
+    "session_id": "c7cd35c8-eb2f-428d-be52-4bf4e4e6fd46",
+    "agent_id": "20260803-210438-420437-96d8ff",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.042752152800000005
+  },
+  {
+    "session_id": "c820b92c-93a6-44eb-9ffd-033dd89c76ef",
+    "agent_id": "20260728-124201-13181-2c0ca5",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.008980966400000002
+  },
+  {
+    "session_id": "c8d9d764-25e9-4af2-80a1-381e57959ba5",
+    "agent_id": "20260803-171911-71474-e6d709",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.011244699200000001
+  },
+  {
+    "session_id": "c9767b38-e844-4414-9666-c3d35e0b8bba",
+    "agent_id": "20260803-171916-71474-2d4bb5",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0161221928
+  },
+  {
+    "session_id": "cb829161-bc04-4342-8ac5-c17758b94b7c",
+    "agent_id": "20260802-225726-1563702-22ba5c",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.04360265280000001
+  },
+  {
+    "session_id": "cb94f272-250c-48e9-b959-7c67487f2269",
+    "agent_id": "20260803-182518-73726-f54f3d",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.022351095200000004
+  },
+  {
+    "session_id": "ce030add-1b36-4488-a157-035321fa9b8e",
+    "agent_id": "20260802-152410-1049-095982",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.007286890000000001
+  },
+  {
+    "session_id": "ce759882-3a83-40bf-a610-fd259b541059",
+    "agent_id": "20260723-230759-588292-d18cb0",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0031087000000000003
+  },
+  {
+    "session_id": "cf54b6ba-a760-414f-a024-0dbfa62d839e",
+    "agent_id": "20260803-223109-569577-e34c5c",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0079597168
+  },
+  {
+    "session_id": "d04edcb5-1268-49f9-92e7-62c7a68dcac7",
+    "agent_id": "20260725-204412-1058-72a220",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.020569275999999997
+  },
+  {
+    "session_id": "d0cc6db7-4c58-4f52-9264-769f9f1e0dfd",
+    "agent_id": "20260803-210147-406017-5693f5",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.015142954400000002
+  },
+  {
+    "session_id": "d1f37c50-b66b-473a-8513-4f2c45355ce4",
+    "agent_id": "20260729-185047-104964-e13e24",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0158299512
+  },
+  {
+    "session_id": "d30ce405-f20a-48e8-96bd-690e1df4df98",
+    "agent_id": "20260802-113058-1049-f00078",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.01186738
+  },
+  {
+    "session_id": "d3e2540c-de08-481f-9e7d-1b86ea11b673",
+    "agent_id": "20260803-222227-569577-c74d90",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.024905697600000002
+  },
+  {
+    "session_id": "d54cba2a-189a-4165-a3f4-fbe55b2ef46b",
+    "agent_id": "20260724-233805-1347702-4bde84",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.007261430399999999
+  },
+  {
+    "session_id": "d5544653-4ec1-4a44-a0cf-aa7e3d8c814a",
+    "agent_id": "20260803-171902-71474-b07b16",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0179355008
+  },
+  {
+    "session_id": "de258471-736d-43d8-a35e-47ab5afd4b7a",
+    "agent_id": "20260801-191925-129210-afcf98",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.1667413328
+  },
+  {
+    "session_id": "e0a8d176-fc95-46d1-bcf9-5c48bca5503b",
+    "agent_id": "20260804-120925-9402-81b4a5",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.008501057600000002
+  },
+  {
+    "session_id": "e0bdb6df-8a52-4176-81b3-6e9ac01f4f35",
+    "agent_id": "20260802-155829-117514-a392dd",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.012613932800000002
+  },
+  {
+    "session_id": "e0e6c077-f42f-4922-9e5d-403964bcfb18",
+    "agent_id": "20260727-125510-57413-8ac041",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0022435784
+  },
+  {
+    "session_id": "e0fc5d2c-0c99-4d9a-a332-219695fbd5c3",
+    "agent_id": "20260803-222401-226166-0994e7",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0
+  },
+  {
+    "session_id": "e0fc5d2e-0c99-4d9a-a332-219695fbd5c3",
+    "agent_id": "20260803-222211-226166-1b5897",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.005157404000000001
+  },
+  {
+    "session_id": "e35246d8-0e79-44d8-877a-ddad9d86fd06",
+    "agent_id": "20260803-194222-73726-7e284c",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0123626272
+  },
+  {
+    "session_id": "e5df9f0f-eae5-4198-983d-e4d28a195df7",
+    "agent_id": "20260803-204005-406017-de2857",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.056940727200000006
+  },
+  {
+    "session_id": "e69080ab-4acd-4546-a207-bbc9fa543543",
+    "agent_id": "20260802-153535-117514-390f75",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0097661816
+  },
+  {
+    "session_id": "e70ffa66-7cf3-43d4-8544-b95bdf7de5b3",
+    "agent_id": "20260803-211753-420437-debf4c",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.015439463200000001
+  },
+  {
+    "session_id": "e8dcef65-6f02-49ff-b8cb-163393251922",
+    "agent_id": "20260804-122711-9402-837dc4",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0815768352
+  },
+  {
+    "session_id": "e8f578b2-164a-4ade-b9e3-e7697d248a25",
+    "agent_id": "20260802-123254-1049-ea1c14",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.0038894700000000003
+  },
+  {
+    "session_id": "e90adb99-67e0-46ac-980b-05e0e8d6acc0",
+    "agent_id": "20260803-194658-73726-a929c1",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.1288364784
+  },
+  {
+    "session_id": "e98ea359-970f-4420-a94d-94daa881dc51",
+    "agent_id": "20260802-230421-1563702-33577a",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.006837896800000001
+  },
+  {
+    "session_id": "e9972c23-5bb6-48d3-9787-3655181cbcbf",
+    "agent_id": "20260724-151026-1062767-e39115",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.002519916
+  },
+  {
+    "session_id": "ed8489cd-fc67-4dc1-8e53-002b6b392336",
+    "agent_id": "20260803-224731-575380-bb35f1",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0774587912
+  },
+  {
+    "session_id": "ef627d1a-5324-4308-a012-16723241c5fe",
+    "agent_id": "20260802-172857-491893-0b1372",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.022269735000000002
+  },
+  {
+    "session_id": "f14fbddd-9eb2-4f61-a007-6719b8d652e8",
+    "agent_id": "20260723-221034-580356-8a46e0",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0020747832
+  },
+  {
+    "session_id": "f325ea56-8770-4e2c-9bcb-b5e2d45a5b53",
+    "agent_id": "20260802-202700-491893-d0094a",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0712807928
+  },
+  {
+    "session_id": "fa994048-17aa-4a8f-a555-2eeb293d2614",
+    "agent_id": "20260801-183317-88596-4f3237",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.006352024000000001
+  },
+  {
+    "session_id": "fb828351-f16d-4d94-9c05-73bbd8d6b204",
+    "agent_id": "20260801-210904-129210-4f61e2",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.017978676800000003
+  },
+  {
+    "session_id": "fdd73dd7-43de-4e20-b7f6-13bfc6842834",
+    "agent_id": "20260804-124602-9999-8b8f65",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0092611288
+  },
+  {
+    "session_id": "fe54bbe9-f355-494b-ba0d-7180e4bf771d",
+    "agent_id": "20260802-222640-1563702-7c9c63",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.015351599200000003
+  },
+  {
+    "session_id": "fe67929d-2a09-4b25-b954-070b4b0265d8",
+    "agent_id": "20260803-204748-420437-da88ec",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.03399840640000001
+  },
+  {
+    "session_id": "ffc0852c-2805-4390-8830-e039f720bec3",
+    "agent_id": "20260803-221231-406017-5192a4",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.0081192664
+  },
+  {
+    "session_id": "ffc793ff-8724-487d-8427-5d3cbc0c78f8",
+    "agent_id": "20260802-152234-117514-8eb2b1",
+    "model_slug": "openai/gpt-5.6-luna",
+    "reported_cost_usd": 0.010734570000000002
+  },
+  {
+    "session_id": "ffd18a79-8fed-4515-b455-f547de992035",
+    "agent_id": "20260804-123448-9999-a1503c",
+    "model_slug": "deepseek-v4-flash",
+    "reported_cost_usd": 0.054769612800000006
+  }
+]

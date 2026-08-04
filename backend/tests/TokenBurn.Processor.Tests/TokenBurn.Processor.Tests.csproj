@@ -4,6 +4,10 @@
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio"><PrivateAssets>all</PrivateAssets></PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <ProjectReference Include="../../src/TokenBurn.Processor/TokenBurn.Processor.csproj" />
+    <ProjectReference Include="../TokenBurn.Testing.Common/TokenBurn.Testing.Common.csproj" />
+    <None Include="fixtures/reconciliation-ledger.jsonl" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="fixtures/reconciliation-comparison-set.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

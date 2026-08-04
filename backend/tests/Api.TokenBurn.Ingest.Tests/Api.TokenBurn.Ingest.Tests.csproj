@@ -4,6 +4,11 @@
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio"><PrivateAssets>all</PrivateAssets></PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Google.Protobuf" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <ProjectReference Include="../../src/api.TokenBurn.Ingest/api.TokenBurn.Ingest.csproj" />
+    <ProjectReference Include="../TokenBurn.Testing.Common/TokenBurn.Testing.Common.csproj" />
   </ItemGroup>
 </Project>

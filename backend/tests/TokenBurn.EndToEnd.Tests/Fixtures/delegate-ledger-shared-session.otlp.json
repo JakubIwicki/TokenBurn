@@ -1,0 +1,54 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          { "key": "session.id", "value": { "stringValue": "shared-sess-1" } },
+          { "key": "tokenburn.source", "value": { "stringValue": "delegate-ledger" } }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": { "name": "delegate-ledger" },
+          "spans": [
+            {
+              "traceId": "AAAAAAAAAAAAAAAAAAAAAA==",
+              "spanId": "AAAAAAAAAAA=",
+              "name": "delegate child 1",
+              "startTimeUnixNano": "1785628800000000000",
+              "endTimeUnixNano": "1785629100000000000",
+              "attributes": [
+                { "key": "tokenburn.handle", "value": { "stringValue": "20260802-delegate-shared-h1" } },
+                { "key": "tokenburn.persona", "value": { "stringValue": "engineering" } },
+                { "key": "gen_ai.request.model", "value": { "stringValue": "deepseek-v4-flash" } },
+                { "key": "tokenburn.status", "value": { "stringValue": "ok" } },
+                { "key": "gen_ai.usage.input_tokens", "value": { "intValue": 4200 } },
+                { "key": "gen_ai.usage.cache_read_tokens", "value": { "intValue": 1800 } },
+                { "key": "gen_ai.usage.cache_write_tokens", "value": { "intValue": 900 } },
+                { "key": "gen_ai.usage.output_tokens", "value": { "intValue": 640 } },
+                { "key": "tokenburn.cost_usd", "value": { "doubleValue": 0.25 } }
+              ]
+            },
+            {
+              "traceId": "AAAAAAAAAAAAAAAAAAAAAA==",
+              "spanId": "AAAAAAAAAAA=",
+              "name": "delegate child 2",
+              "startTimeUnixNano": "1785628800000000000",
+              "endTimeUnixNano": "1785629100000000000",
+              "attributes": [
+                { "key": "tokenburn.handle", "value": { "stringValue": "20260802-delegate-shared-h2" } },
+                { "key": "tokenburn.persona", "value": { "stringValue": "research" } },
+                { "key": "gen_ai.request.model", "value": { "stringValue": "deepseek-v4-flash" } },
+                { "key": "tokenburn.status", "value": { "stringValue": "ok" } },
+                { "key": "gen_ai.usage.input_tokens", "value": { "intValue": 1500 } },
+                { "key": "gen_ai.usage.cache_read_tokens", "value": { "intValue": 900 } },
+                { "key": "gen_ai.usage.output_tokens", "value": { "intValue": 210 } },
+                { "key": "tokenburn.cost_usd", "value": { "doubleValue": 0.5 } }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

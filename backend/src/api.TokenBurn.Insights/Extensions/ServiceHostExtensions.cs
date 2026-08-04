@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using TokenBurn.Common.Messaging;
+using TokenBurn.Common.Security;
 
 namespace Api.TokenBurn.Insights.Extensions;
 
@@ -9,6 +10,7 @@ public static class ServiceHostExtensions
     public static WebApplicationBuilder AddApiServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddHealthChecks();
+        builder.AddTokenBurnJwtAuth();
         builder.Services.AddTokenBurnMediatR(typeof(Program).Assembly);
         builder.Services.AddProblemDetails();
         return builder;
@@ -16,6 +18,7 @@ public static class ServiceHostExtensions
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
+        app.UseTokenBurnAuth();
         app.MapHealthChecks("/health");
         app.MapHealthChecks("/health/ready");
         return app;

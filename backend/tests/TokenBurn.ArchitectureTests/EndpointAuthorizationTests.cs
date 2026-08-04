@@ -17,15 +17,28 @@ public sealed class EndpointAuthorizationTests
     public void AllIdentityEndpoints_AreAuthorizedOrExplicitlyAllowListed()
     {
         WebApplication app = BuildHostWithoutHostedServices(
-            b => IdentityServiceHost.AddApiServices(b),
+            b =>
+            {
+                b.Configuration["ConnectionStrings:Identity"] = "Host=localhost;Database=identity;Username=test;Password=test";
+                b.Configuration["Jwt:Authority"] = "http://localhost/connect";
+                b.Configuration["Identity:CollectorClientSecret"] = "test-secret";
+                b.Configuration["Identity:DevUser:Username"] = "dev";
+                b.Configuration["Identity:DevUser:Password"] = "test-password";
+                IdentityServiceHost.AddApiServices(b);
+                b.Services.AddControllers().AddApplicationPart(typeof(Api.TokenBurn.Identity.Extensions.ServiceHostExtensions).Assembly);
+            },
             a => IdentityServiceHost.MapDefaultEndpoints(a));
 
-        // `/api/models` (anonymous model directory, privacy-boundary.md rule 8)
-        // joins this list in Phase 3 when the endpoint exists.
+        // OpenIddict protocol and metadata endpoints are intentionally anonymous (dotnet-security-baseline).
         var allowList = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            "/health", // liveness probe consumed anonymously by container healthchecks (docker-compose.yml)
-            "/health/ready" // readiness probe consumed anonymously by container healthchecks (docker-compose.yml)
+            "/health",
+            "/health/ready",
+            // MVC exposes these OpenIddict protocol routes without a leading slash.
+            "connect/token",
+            "connect/authorize",
+            "connect/login",
+            "connect/logout"
         };
 
         ICollection<EndpointDataSource> dataSources = ((IEndpointRouteBuilder)app).DataSources;
@@ -41,7 +54,7 @@ public sealed class EndpointAuthorizationTests
         // Bump this const deliberately when an endpoint is added — a silently
         // shrinking count is the exact failure mode that lets an endpoint
         // escape the authorization scan.
-        const int expectedScannedPairCount = 2;
+        const int expectedScannedPairCount = 7;
         result.ScannedCount.Should().Be(expectedScannedPairCount,
             $"the authorization convention must scan exactly {expectedScannedPairCount} method+pattern pairs " +
             $"(one per mapped endpoint); a count drop means endpoints escaped the scan");
@@ -67,8 +80,15 @@ public sealed class EndpointAuthorizationTests
     public void AllIngestEndpoints_AreAuthorizedOrExplicitlyAllowListed()
     {
         WebApplication app = BuildHostWithoutHostedServices(
-            b => IngestServiceHost.AddApiServices(b),
+            b =>
+            {
+                b.Configuration["Jwt:Authority"] = "http://localhost/connect";
+                b.Configuration["ConnectionStrings:Ingest"] = "Host=localhost;Database=ingest;Username=test;Password=test";
+                IngestServiceHost.AddApiServices(b);
+            },
             a => IngestServiceHost.MapDefaultEndpoints(a));
+
+        // Ingest maps two authenticated OTLP endpoints in addition to health probes.
 
         // `/api/models` (anonymous model directory, privacy-boundary.md rule 8)
         // joins this list in Phase 3 when the endpoint exists.
@@ -91,7 +111,7 @@ public sealed class EndpointAuthorizationTests
         // Bump this const deliberately when an endpoint is added — a silently
         // shrinking count is the exact failure mode that lets an endpoint
         // escape the authorization scan.
-        const int expectedScannedPairCount = 2;
+        const int expectedScannedPairCount = 4;
         result.ScannedCount.Should().Be(expectedScannedPairCount,
             $"the authorization convention must scan exactly {expectedScannedPairCount} method+pattern pairs " +
             $"(one per mapped endpoint); a count drop means endpoints escaped the scan");
@@ -117,7 +137,11 @@ public sealed class EndpointAuthorizationTests
     public void AllInsightsEndpoints_AreAuthorizedOrExplicitlyAllowListed()
     {
         WebApplication app = BuildHostWithoutHostedServices(
-            b => InsightsServiceHost.AddApiServices(b),
+            b =>
+            {
+                b.Configuration["Jwt:Authority"] = "http://localhost/connect";
+                InsightsServiceHost.AddApiServices(b);
+            },
             a => InsightsServiceHost.MapDefaultEndpoints(a));
 
         // `/api/models` (anonymous model directory, privacy-boundary.md rule 8)
@@ -167,7 +191,12 @@ public sealed class EndpointAuthorizationTests
     public void AllProcessorEndpoints_AreAuthorizedOrExplicitlyAllowListed()
     {
         WebApplication app = BuildHostWithoutHostedServices(
-            b => ProcessorServiceHost.AddProcessorServices(b),
+            b =>
+            {
+                b.Configuration["ConnectionStrings:Processor"] =
+                    "Host=localhost;Database=processor;Username=test;Password=test";
+                ProcessorServiceHost.AddProcessorServices(b);
+            },
             a => ProcessorServiceHost.MapProcessorEndpoints(a));
 
         // `/api/models` (anonymous model directory, privacy-boundary.md rule 8)

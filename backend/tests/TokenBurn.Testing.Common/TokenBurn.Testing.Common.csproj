@@ -2,4 +2,19 @@
   <PropertyGroup>
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Moq" />
+    <PackageReference Include="Npgsql" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/TokenBurn.Common/TokenBurn.Common.csproj" />
+    <ProjectReference Include="../../src/TokenBurn.Processor/TokenBurn.Processor.csproj" />
+    <ProjectReference Include="../../src/api.TokenBurn.Ingest/api.TokenBurn.Ingest.csproj" />
+  </ItemGroup>
 </Project>

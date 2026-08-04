@@ -75,9 +75,13 @@ services:
       context: ./backend
       dockerfile: src/api.TokenBurn.Identity/Dockerfile
     environment:
+      ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: ${ASPNETCORE_URLS:?ASPNETCORE_URLS must be set}
       ConnectionStrings__Identity: ${IDENTITY_CONNECTION_STRING:?IDENTITY_CONNECTION_STRING must be set}
       Jwt__Authority: ${JWT_AUTHORITY_URL:?JWT_AUTHORITY_URL must be set}
+      Identity__CollectorClientSecret: ${IDENTITY__COLLECTORCLIENTSECRET:?IDENTITY__COLLECTORCLIENTSECRET must be set}
+      Identity__DevUser__Username: ${IDENTITY__DEVUSER__USERNAME:?IDENTITY__DEVUSER__USERNAME must be set}
+      Identity__DevUser__Password: ${IDENTITY__DEVUSER__PASSWORD:?IDENTITY__DEVUSER__PASSWORD must be set}
     networks: [tokenburn]
     expose: ["8080"]
     depends_on:
@@ -93,9 +97,14 @@ services:
       context: ./backend
       dockerfile: src/api.TokenBurn.Ingest/Dockerfile
     environment:
+      ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: ${ASPNETCORE_URLS:?ASPNETCORE_URLS must be set}
       ConnectionStrings__Ingest: ${INGEST_CONNECTION_STRING:?INGEST_CONNECTION_STRING must be set}
       Kafka__BootstrapServers: ${KAFKA_BOOTSTRAP_SERVERS:?KAFKA_BOOTSTRAP_SERVERS must be set}
+      Jwt__Authority: ${JWT_AUTHORITY_URL:?JWT_AUTHORITY_URL must be set}
+      Jwt__MetadataAddress: ${JWT_METADATA_ADDRESS:?JWT_METADATA_ADDRESS must be set}
+      Ingest__RateLimit__TokenLimit: 10000
+      Ingest__RateLimit__TokensPerPeriod: 10000
     networks: [tokenburn]
     expose: ["8080"]
     depends_on:
@@ -112,12 +121,14 @@ services:
       context: ./backend
       dockerfile: src/api.TokenBurn.Insights/Dockerfile
     environment:
+      ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: ${ASPNETCORE_URLS:?ASPNETCORE_URLS must be set}
       ConnectionStrings__Insights: ${INSIGHTS_CONNECTION_STRING:?INSIGHTS_CONNECTION_STRING must be set}
       Elasticsearch__Uri: ${ELASTICSEARCH_URI:?ELASTICSEARCH_URI must be set}
       Elasticsearch__Username: ${ELASTICSEARCH_USERNAME:?ELASTICSEARCH_USERNAME must be set}
       Elasticsearch__Password: ${ELASTIC_PASSWORD:?ELASTIC_PASSWORD must be set}
       Jwt__Authority: ${JWT_AUTHORITY_URL:?JWT_AUTHORITY_URL must be set}
+      Jwt__MetadataAddress: ${JWT_METADATA_ADDRESS:?JWT_METADATA_ADDRESS must be set}
     networks: [tokenburn]
     expose: ["8080"]
     depends_on:

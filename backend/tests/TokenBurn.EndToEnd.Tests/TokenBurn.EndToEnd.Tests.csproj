@@ -6,5 +6,20 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Testcontainers" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Testcontainers.Kafka" />
+    <PackageReference Include="Confluent.Kafka" />
+    <ProjectReference Include="../../src/api.TokenBurn.Ingest/api.TokenBurn.Ingest.csproj">
+      <Aliases>ingest</Aliases>
+    </ProjectReference>
+    <ProjectReference Include="../../src/TokenBurn.Processor/TokenBurn.Processor.csproj">
+      <Aliases>processor</Aliases>
+    </ProjectReference>
+    <None Include="Fixtures/delegate-ledger.otlp.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Fixtures/delegate-ledger-shared-session.otlp.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

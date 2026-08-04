@@ -1,6 +1,6 @@
 namespace TokenBurn.Contracts;
 
-// Kafka message contracts land in Phase 2
+/// <summary>Assembly marker referenced by TokenBurn.Contracts.Tests.</summary>
 public static class ContractsAssemblyMarker
 {
 }

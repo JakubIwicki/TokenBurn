@@ -20,6 +20,9 @@ jobs:
       - run: dotnet restore backend/TokenBurn.slnx
       - run: dotnet build backend/TokenBurn.slnx --no-restore
       - run: dotnet test backend/TokenBurn.slnx --no-build
+      # Pinned delegate-ledger fixture: the derivation script mirrors the adapter's
+      # test-handle filter and key collapse; the expected count is pinned at 1148.
+      - run: test "$(python3 backend/tests/TokenBurn.Processor.Tests/fixtures/derive-expected-count.py backend/tests/TokenBurn.Processor.Tests/fixtures/delegate-ledger.jsonl)" = "1148"
 
   frontend:
     runs-on: ubuntu-latest

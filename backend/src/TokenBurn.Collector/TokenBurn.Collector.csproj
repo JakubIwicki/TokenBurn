@@ -1,4 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><OutputType>Exe</OutputType><AssemblyName>TokenBurn.Collector</AssemblyName><RootNamespace>TokenBurn.Collector</RootNamespace></PropertyGroup>
-  <ItemGroup><ProjectReference Include="../TokenBurn.Common/TokenBurn.Common.csproj" /></ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../TokenBurn.Common/TokenBurn.Common.csproj" />
+    <PackageReference Include="Google.Protobuf" />
+    <PackageReference Include="Grpc.Tools" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <Protobuf Include="Otlp/protos/**/*.proto" ProtoRoot="Otlp/protos" GrpcServices="None" Access="Public" />
+  </ItemGroup>
 </Project>
