@@ -13,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Npgsql;
+using Testcontainers.Kafka;
 using TokenBurn.Common.Security;
 using TokenBurn.Processor.Domain;
 using TokenBurn.Processor.Persistence;
@@ -25,12 +26,16 @@ public sealed class ImportsEndpointsTests : IAsyncLifetime
 {
     private const string NoAuthHeader = "X-Test-No-Auth";
 
+    private readonly KafkaContainer _kafka = new KafkaBuilder("confluentinc/cp-kafka:7.5.12").Build();
     private WebApplicationFactory<TelemetryDbContext> _factory = null!;
     private HttpClient _client = null!;
     private string _cloneDatabaseName = null!;
 
     public async Task InitializeAsync()
     {
+        using CancellationTokenSource timeout = new(TimeSpan.FromMinutes(3));
+        await _kafka.StartAsync(timeout.Token);
+
         string template = await SharedPostgres.GetOrCreateTemplateAsync("telemetry", TelemetryDbMigration.RunAsync);
         string connectionString = await SharedPostgres.CloneAsync(template);
         _cloneDatabaseName = new NpgsqlConnectionStringBuilder(connectionString).Database!;
@@ -40,6 +45,7 @@ public sealed class ImportsEndpointsTests : IAsyncLifetime
             builder.UseEnvironment("Testing");
             builder.UseSetting("ConnectionStrings:Processor", connectionString);
             builder.UseSetting("Jwt:Authority", "http://localhost/connect");
+            builder.UseSetting("Kafka:BootstrapServers", _kafka.GetBootstrapAddress());
             builder.ConfigureServices(services =>
             {
                 services.RemoveAll<IHostedService>();
@@ -63,6 +69,7 @@ public sealed class ImportsEndpointsTests : IAsyncLifetime
         _client.Dispose();
         await _factory.DisposeAsync();
         await SharedPostgres.DropDatabaseAsync(_cloneDatabaseName);
+        await _kafka.DisposeAsync();
     }
 
     [Fact]

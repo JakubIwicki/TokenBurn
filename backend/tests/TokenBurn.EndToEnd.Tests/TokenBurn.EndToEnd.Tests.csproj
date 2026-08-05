@@ -8,6 +8,7 @@
     <PackageReference Include="Testcontainers" />
     <PackageReference Include="Testcontainers.PostgreSql" />
     <PackageReference Include="Testcontainers.Kafka" />
+    <PackageReference Include="Testcontainers.Elasticsearch" />
     <PackageReference Include="Confluent.Kafka" />
     <ProjectReference Include="../../src/api.TokenBurn.Ingest/api.TokenBurn.Ingest.csproj">
       <Aliases>ingest</Aliases>

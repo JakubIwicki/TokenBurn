@@ -11,6 +11,8 @@ using TokenBurn.Processor.Adapters;
 using TokenBurn.Processor.Commands;
 using TokenBurn.Processor.Domain;
 using TokenBurn.Processor.Features.Imports;
+using TokenBurn.Processor.Infrastructure;
+using TokenBurn.Processor.Infrastructure.Indexing;
 using TokenBurn.Processor.Persistence;
 using TokenBurn.Processor.Pricing;
 
@@ -38,7 +40,16 @@ public static class ProcessorExtensions
         builder.Services.AddScoped<PricingEngine>();
         builder.Services.AddScoped<AgentRunUpserter>();
         builder.Services.AddScoped<IImportCommandExecutor, ClaudeCodeTranscriptImportExecutor>();
+        builder.Services.AddSingleton<KafkaTopicInitializer>();
+        builder.Services.AddProcessorElasticsearchClient(builder.Configuration);
+        builder.Services.AddSingleton<SearchIndexTemplateInitializer>();
+        builder.Services.AddSingleton<IRunIndexer, ElasticsearchRunIndexer>();
+        builder.Services.AddScoped<RunReplayService>();
+        // Replay first (it re-publishes agent_runs as PricedRun; the index
+        // consumer is Earliest and catches up), then the live consumers.
+        builder.Services.AddHostedService<RunReplayTrigger>();
         builder.Services.AddHostedService<TelemetryRawConsumer>();
+        builder.Services.AddHostedService<PricedRunIndexConsumer>();
         builder.Services.AddHostedService<ImportCommandWorker>();
         return builder;
     }
@@ -48,6 +59,9 @@ public static class ProcessorExtensions
         await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
         await scope.ServiceProvider.GetRequiredService<TelemetryDbContext>().Database.MigrateAsync(cancellationToken);
         await scope.ServiceProvider.GetRequiredService<PricingSeeder>().SeedAsync(cancellationToken);
+        // Topics must exist before the hosted consumers subscribe; Program.cs
+        // awaits this, and endpoint-authorization tests never call it.
+        await scope.ServiceProvider.GetRequiredService<KafkaTopicInitializer>().EnsureTopicsAsync(cancellationToken);
         return app;
     }
 
@@ -68,16 +82,22 @@ internal sealed class TelemetryRawConsumer(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        ConsumerConfig config = new()
+        string bootstrapServers = configuration["Kafka:BootstrapServers"]
+            ?? throw new InvalidOperationException("Kafka:BootstrapServers must be configured.");
+        ConsumerConfig consumerConfig = new()
         {
-            BootstrapServers = configuration["Kafka:BootstrapServers"]
-                ?? throw new InvalidOperationException("Kafka:BootstrapServers must be configured."),
+            BootstrapServers = bootstrapServers,
             GroupId = "processor-telemetry-raw",
             AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false
         };
-        using IConsumer<string, string> consumer = new ConsumerBuilder<string, string>(config).Build();
-        consumer.Subscribe("telemetry.raw");
+        using IConsumer<string, string> consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
+        using IProducer<string, string> producer = new ProducerBuilder<string, string>(new ProducerConfig
+        {
+            BootstrapServers = bootstrapServers,
+            EnableIdempotence = true
+        }).Build();
+        consumer.Subscribe(KafkaTopics.Raw);
         try
         {
             while (!stoppingToken.IsCancellationRequested)
@@ -97,6 +117,15 @@ internal sealed class TelemetryRawConsumer(
                         if (!pricing.IsSuccess)
                             logger.LogWarning("Pricing run {RunId} failed: {Error}", run.Id, pricing.ErrorMessage);
                         await upserter.UpsertAsync(run, stoppingToken);
+                        // Crash-safe order: upsert -> publish -> commit. A crash between publish
+                        // and commit re-publishes the PricedRun; the index layer collapses the
+                        // duplicate (_id = runId overwrite), so the run doc count stays distinct.
+                        Contracts.PricedRun priced = PricedRunMapper.ToPricedRun(run);
+                        await producer.ProduceAsync(KafkaTopics.Priced, new Message<string, string>
+                        {
+                            Key = priced.SessionId,
+                            Value = KafkaJsonSerializer.Serialize(priced)
+                        }, stoppingToken);
                     }
                     consumer.Commit(result);
                 }

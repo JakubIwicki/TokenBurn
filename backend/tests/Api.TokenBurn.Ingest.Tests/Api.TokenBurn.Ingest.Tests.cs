@@ -23,7 +23,7 @@ namespace Api.TokenBurn.Ingest.Tests;
 public sealed class ApiTokenBurnIngestTests : IAsyncLifetime
 {
     private const string NoAuthHeader = "X-Test-No-Auth";
-    private readonly PostgreSqlContainer _database = new PostgreSqlBuilder().Build();
+    private readonly PostgreSqlContainer _database = new PostgreSqlBuilder("postgres:16").Build();
     private WebApplicationFactory<IngestDbContext> _factory = null!;
     private HttpClient _client = null!;
 

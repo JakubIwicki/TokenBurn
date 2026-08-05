@@ -9,12 +9,14 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Confluent.Kafka;
+using Elastic.Clients.Elasticsearch;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Testcontainers.Elasticsearch;
 using Testcontainers.Kafka;
 using Testcontainers.PostgreSql;
 using IngestDb = ingest::Api.TokenBurn.Ingest.IngestDbContext;
@@ -25,6 +27,7 @@ using OtlpGenAiAdapter = processor::TokenBurn.Processor.Adapters.OtlpGenAiAdapte
 using RunStatus = processor::TokenBurn.Processor.Domain.RunStatus;
 using PricingStatus = processor::TokenBurn.Processor.Domain.PricingStatus;
 using LedgerStatus = processor::TokenBurn.Processor.Adapters.LedgerStatus;
+using RunReplayService = processor::TokenBurn.Processor.Commands.RunReplayService;
 
 namespace TokenBurn.EndToEnd.Tests;
 
@@ -39,6 +42,7 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
     private const string TieSessionId = "shared-sess-4";
     private const string TieHandle = "20260802-delegate-tie-h1";
     private const string TopicName = "telemetry.raw";
+    private const string TracesIndexName = "traces";
     // endTimeUnixNano 1785629100000000000 / 1_000_000, the fixed completion time the
     // payload builder stamps on completed runs.
     private static readonly DateTimeOffset ProgressEndTime = DateTimeOffset.FromUnixTimeMilliseconds(1_785_629_100_000);
@@ -200,9 +204,12 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
         Assert.Equal(HttpStatusCode.OK, first.StatusCode);
         Assert.Equal(HttpStatusCode.OK, second.StatusCode);
 
-        bool converged = await WaitUntilAsync(
-            async () => await CountAgentRunsForSessionsAsync([ProgressSessionId]) == 1,
-            PipelineTimeout);
+        bool converged = await WaitUntilAsync(async () =>
+        {
+            if (await CountAgentRunsForSessionsAsync([ProgressSessionId]) != 1)
+                return false;
+            return (await LoadAgentRunAsync(ProgressSessionId, "")).Status == RunStatus.Completed;
+        }, PipelineTimeout);
         Assert.True(converged, $"Progress run did not converge to a single row for session {ProgressSessionId}.");
 
         AgentRun run = await LoadAgentRunAsync(ProgressSessionId, "");
@@ -269,6 +276,67 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
         Assert.Equal(1, await CountAgentRunsForSessionsAsync([TieSessionId]));
     }
 
+    [Fact]
+    public async Task FullChain_PostOtlp_IndexesIntoElasticsearch()
+    {
+        FixtureData fixture = LoadFixture();
+
+        using HttpResponseMessage response = await PostAsync(fixture.Json);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        bool converged = await WaitUntilAsync(async () => await CountAgentRunsForSessionsAsync(fixture.SessionIds) == fixture.Expected, PipelineTimeout);
+        Assert.True(converged, $"Ledger did not converge to {fixture.Expected} agent runs within the timeout.");
+
+        AgentRun run = await LoadAgentRunAsync(fixture.FirstSessionId, "");
+        Dictionary<string, JsonElement>? stored = null;
+        bool indexed = await WaitUntilAsync(async () =>
+        {
+            stored = await TryGetElasticsearchSourceAsync(run.Id);
+            return stored is not null;
+        }, PipelineTimeout);
+        Assert.True(indexed, $"Run {run.Id} was not indexed into Elasticsearch within the timeout.");
+
+        Dictionary<string, JsonElement> source = stored!;
+        Assert.Equal(fixture.FirstSessionId, source["session_id"].GetString());
+        Assert.Equal("deepseek-v4-flash", source["model_slug"].GetString());
+        Assert.Equal("Completed", source["status"].GetString());
+        Assert.Equal("Priced", source["pricing_status"].GetString());
+        Assert.False(source.ContainsKey("sessionId"));
+        Assert.False(source.ContainsKey("modelSlug"));
+    }
+
+    [Fact]
+    public async Task Replay_KeepsElasticsearchDocCountUnchanged()
+    {
+        FixtureData fixture = LoadFixture();
+
+        using HttpResponseMessage response = await PostAsync(fixture.Json);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        bool converged = await WaitUntilAsync(async () => await CountAgentRunsForSessionsAsync(fixture.SessionIds) == fixture.Expected, PipelineTimeout);
+        Assert.True(converged, $"Ledger did not converge to {fixture.Expected} agent runs within the timeout.");
+
+        AgentRun run = await LoadAgentRunAsync(fixture.FirstSessionId, "");
+        bool indexed = await WaitUntilAsync(async () => await CountElasticsearchDocumentsForRunAsync(run.Id) == 1L, PipelineTimeout);
+        Assert.True(indexed, $"Run {run.Id} was not indexed into Elasticsearch within the timeout.");
+        Assert.Equal(1L, await CountElasticsearchDocumentsForRunAsync(run.Id));
+
+        using (IServiceScope replayScope = _fixture.ProcessorFactory.Services.CreateScope())
+        {
+            RunReplayService replay = replayScope.ServiceProvider.GetRequiredService<RunReplayService>();
+            await replay.ReplayAsync(CancellationToken.None);
+            await replay.ReplayAsync(CancellationToken.None);
+        }
+
+        DateTimeOffset settleDeadline = TimeProvider.System.GetUtcNow().Add(RedeliveryWatchWindow);
+        do
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(250));
+            Assert.Equal(1L, await CountElasticsearchDocumentsForRunAsync(run.Id));
+        } while (TimeProvider.System.GetUtcNow() < settleDeadline);
+        Assert.Equal(1L, await CountElasticsearchDocumentsForRunAsync(run.Id));
+    }
+
     private Task<HttpResponseMessage> PostAsync(string json)
         => _client.PostAsync("/v1/traces", new StringContent(json, Encoding.UTF8, "application/json"));
 
@@ -306,6 +374,31 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
         using IServiceScope scope = _fixture.ProcessorFactory.Services.CreateScope();
         TelemetryDb db = scope.ServiceProvider.GetRequiredService<TelemetryDb>();
         return await db.AgentRuns.SingleAsync(run => run.SessionId == sessionId && run.AgentId == agentId);
+    }
+
+    private async Task<Dictionary<string, JsonElement>?> TryGetElasticsearchSourceAsync(Guid runId)
+    {
+        GetResponse<Dictionary<string, JsonElement>> response = await _fixture.ElasticsearchClient.GetAsync<Dictionary<string, JsonElement>>(
+            TracesIndexName, runId.ToString("D"), CancellationToken.None);
+        if (!response.IsValidResponse)
+            return null;
+        return response.Source;
+    }
+
+    private async Task<long> CountElasticsearchDocumentsForRunAsync(Guid runId)
+    {
+        var exists = await _fixture.ElasticsearchClient.Indices.ExistsAsync(TracesIndexName, CancellationToken.None);
+        if (!exists.Exists)
+            return -1;
+
+        await _fixture.ElasticsearchClient.Indices.RefreshAsync(TracesIndexName, CancellationToken.None);
+        CountResponse count = await _fixture.ElasticsearchClient.CountAsync(
+            TracesIndexName,
+            c => c.Query(q => q.Term(t => t.Field("id").Value(runId.ToString("D")))),
+            CancellationToken.None);
+        if (!count.IsValidResponse)
+            throw new InvalidOperationException($"ES count failed: {count.DebugInformation}");
+        return count.Count;
     }
 
     private async Task AssertLedgerSpotCheckAsync(FixtureData fixture)
@@ -557,20 +650,32 @@ public sealed class TelemetryPipelineE2EFixture : IAsyncLifetime
 {
     private const string NoAuthHeader = "X-Test-No-Auth";
 
-    private readonly PostgreSqlContainer _database = new PostgreSqlBuilder().Build();
-    private readonly KafkaContainer _kafka = new KafkaBuilder().Build();
+    private readonly PostgreSqlContainer _database = new PostgreSqlBuilder("postgres:16").Build();
+    private readonly KafkaContainer _kafka = new KafkaBuilder("confluentinc/cp-kafka:7.5.12").Build();
+    private readonly ElasticsearchContainer _elasticsearch = new ElasticsearchBuilder("docker.elastic.co/elasticsearch/elasticsearch:9.0.0")
+        .WithEnvironment("discovery.type", "single-node")
+        .WithEnvironment("xpack.security.enabled", "false")
+        .WithEnvironment("xpack.security.http.ssl.enabled", "false")
+        .WithEnvironment("ES_JAVA_OPTS", "-Xms512m -Xmx512m")
+        .Build();
 
     public WebApplicationFactory<ingest::Program> IngestFactory { get; private set; } = null!;
     public WebApplicationFactory<processor::Program> ProcessorFactory { get; private set; } = null!;
     public string KafkaBootstrapServers => _kafka.GetBootstrapAddress();
+    public ElasticsearchClient ElasticsearchClient { get; private set; } = null!;
 
     public async Task InitializeAsync()
     {
         using CancellationTokenSource timeout = new(TimeSpan.FromMinutes(3));
-        await Task.WhenAll(_database.StartAsync(timeout.Token), _kafka.StartAsync(timeout.Token));
+        await Task.WhenAll(
+            _database.StartAsync(timeout.Token),
+            _kafka.StartAsync(timeout.Token),
+            _elasticsearch.StartAsync(timeout.Token));
 
         string pgConnection = _database.GetConnectionString();
         string kafkaAddress = _kafka.GetBootstrapAddress();
+        string elasticsearchAddress = $"http://{_elasticsearch.Hostname}:{_elasticsearch.GetMappedPublicPort(9200)}";
+        ElasticsearchClient = new ElasticsearchClient(new ElasticsearchClientSettings(new Uri(elasticsearchAddress)));
 
         IngestFactory = new WebApplicationFactory<ingest::Program>().WithWebHostBuilder(builder =>
         {
@@ -597,6 +702,7 @@ public sealed class TelemetryPipelineE2EFixture : IAsyncLifetime
             builder.UseSetting("ConnectionStrings:Processor", pgConnection);
             builder.UseSetting("Jwt:Authority", "http://localhost/connect");
             builder.UseSetting("Kafka:BootstrapServers", kafkaAddress);
+            builder.UseSetting("Elasticsearch:Uri", elasticsearchAddress);
         });
 
         // Starting each host runs its EF migrations and boots the background services:
@@ -612,6 +718,7 @@ public sealed class TelemetryPipelineE2EFixture : IAsyncLifetime
         await ProcessorFactory.DisposeAsync();
         await _database.DisposeAsync();
         await _kafka.DisposeAsync();
+        await _elasticsearch.DisposeAsync();
     }
 
     private sealed class TestAuthenticationHandler(

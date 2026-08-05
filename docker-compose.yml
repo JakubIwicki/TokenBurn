@@ -131,6 +131,8 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: ${ASPNETCORE_URLS:?ASPNETCORE_URLS must be set}
       ConnectionStrings__Insights: ${INSIGHTS_CONNECTION_STRING:?INSIGHTS_CONNECTION_STRING must be set}
+      Insights__RateLimit__TokenLimit: 10000
+      Insights__RateLimit__TokensPerPeriod: 10000
       Elasticsearch__Uri: ${ELASTICSEARCH_URI:?ELASTICSEARCH_URI must be set}
       Elasticsearch__Username: ${ELASTICSEARCH_USERNAME:?ELASTICSEARCH_USERNAME must be set}
       Elasticsearch__Password: ${ELASTIC_PASSWORD:?ELASTIC_PASSWORD must be set}
@@ -163,6 +165,7 @@ services:
       Embeddings__Uri: ${EMBEDDINGS_URI:?EMBEDDINGS_URI must be set}
       Jwt__Authority: ${JWT_AUTHORITY_URL:?JWT_AUTHORITY_URL must be set}
       Jwt__MetadataAddress: ${JWT_METADATA_ADDRESS:?JWT_METADATA_ADDRESS must be set}
+      Processor__Replay__Enabled: ${PROCESSOR_REPLAY_ENABLED:-false}
     volumes:
       - ${CLAUDE_TRANSCRIPTS_DIR:?CLAUDE_TRANSCRIPTS_DIR must be set}:/data/transcripts:ro
     networks: [tokenburn]

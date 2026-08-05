@@ -8,6 +8,7 @@
     <ProjectReference Include="../TokenBurn.Common/TokenBurn.Common.csproj" />
     <ProjectReference Include="../TokenBurn.Contracts/TokenBurn.Contracts.csproj" />
     <PackageReference Include="Confluent.Kafka" />
+    <PackageReference Include="Elastic.Clients.Elasticsearch" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>

@@ -140,12 +140,14 @@ public sealed class EndpointAuthorizationTests
             b =>
             {
                 b.Configuration["Jwt:Authority"] = "http://localhost/connect";
+                b.Configuration["ConnectionStrings:Insights"] =
+                    "Host=localhost;Database=tokenburn;Username=insights_role;Password=test";
                 InsightsServiceHost.AddApiServices(b);
             },
             a => InsightsServiceHost.MapDefaultEndpoints(a));
 
         // `/api/models` (anonymous model directory, privacy-boundary.md rule 8)
-        // joins this list in Phase 3 when the endpoint exists.
+        // joins this list in Phase 8 when the endpoint exists.
         var allowList = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "/health", // liveness probe consumed anonymously by container healthchecks (docker-compose.yml)
@@ -165,7 +167,7 @@ public sealed class EndpointAuthorizationTests
         // Bump this const deliberately when an endpoint is added — a silently
         // shrinking count is the exact failure mode that lets an endpoint
         // escape the authorization scan.
-        const int expectedScannedPairCount = 2;
+        const int expectedScannedPairCount = 5;
         result.ScannedCount.Should().Be(expectedScannedPairCount,
             $"the authorization convention must scan exactly {expectedScannedPairCount} method+pattern pairs " +
             $"(one per mapped endpoint); a count drop means endpoints escaped the scan");

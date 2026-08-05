@@ -11,6 +11,16 @@
           "librdkafka.redist": "2.12.0"
         }
       },
+      "Elastic.Clients.Elasticsearch": {
+        "type": "Direct",
+        "requested": "[9.5.0, )",
+        "resolved": "9.5.0",
+        "contentHash": "i2Kqz6ha0fwpxrMVyxd+8qJaW9eBQnQ8slQvbNPmAbSYzDgXx0h/26nwA2a6WubTcE6Fdxpnc2t7CvD8gCsRIA==",
+        "dependencies": {
+          "Elastic.Esql": "0.11.0",
+          "Elastic.Transport": "0.17.1"
+        }
+      },
       "Microsoft.EntityFrameworkCore": {
         "type": "Direct",
         "requested": "[10.0.0, )",
@@ -50,6 +60,16 @@
           "Microsoft.EntityFrameworkCore.Relational": "[10.0.0, 11.0.0)",
           "Npgsql": "10.0.0"
         }
+      },
+      "Elastic.Esql": {
+        "type": "Transitive",
+        "resolved": "0.11.0",
+        "contentHash": "frYrulxZxDLsAk5vBw6oVG4dOYcGFSOPBsJ+1EfLn/sEB/fS56zVEbEitdVxreY3xREdhZwS9dtUkAqsAt037g=="
+      },
+      "Elastic.Transport": {
+        "type": "Transitive",
+        "resolved": "0.17.1",
+        "contentHash": "PpDoD+6zxtYgK/DAqQEiVSlkC2Zt1x0JKGaygAx8Oqrkft9Nr1VTuysOWZ6NKsav9WtB4jyHuU/eIZXuc2oZuw=="
       },
       "Humanizer.Core": {
         "type": "Transitive",
