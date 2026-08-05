@@ -66,7 +66,7 @@ public sealed class PricingEngineTests : TelemetryHandlerTestBase
     {
         PricingEngine sut = await CreateSeededSutAsync();
 
-        Result<PriceRow> result = await sut.ResolveAsync("claude-sonnet-5", null, ResolveAsOf, CancellationToken.None);
+        Result<PriceRow> result = await sut.ResolveAsync("claude-nonexistent", null, ResolveAsOf, CancellationToken.None);
 
         result.AssertNotFound();
     }

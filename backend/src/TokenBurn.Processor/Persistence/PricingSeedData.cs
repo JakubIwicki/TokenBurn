@@ -14,7 +14,12 @@ internal static class PricingSeedData
         new("deepseek/deepseek-v4-flash-0731", "openrouter-deepinfra", 0.09m, 0.018m, 0m, 0.18m, 1048576),
         new("openai/gpt-5.6-luna", "openrouter-flex", 0.05m, 0.005m, 0m, 0.3m, 1050000),
         new("xiaomi/mimo-v2.5-pro", "openrouter", 0.435m, 0.0036m, 0m, 0.87m, null),
-        new("xiaomi/mimo-v2.5", "openrouter", 0.14m, 0.0028m, 0m, 0.28m, null)
+        new("xiaomi/mimo-v2.5", "openrouter", 0.14m, 0.0028m, 0m, 0.28m, null),
+        new("claude-fable-5", "anthropic", 10.00m, 1.00m, 0m, 50.00m, 1048576),
+        new("claude-opus-5", "anthropic", 5.00m, 0.50m, 0m, 25.00m, 1048576),
+        new("claude-opus-4-8", "anthropic", 5.00m, 0.50m, 0m, 25.00m, 1048576),
+        new("claude-sonnet-5", "anthropic", 3.00m, 0.30m, 0m, 15.00m, 1048576),
+        new("claude-haiku-4-5-20251001", "anthropic", 1.00m, 0.10m, 0m, 5.00m, 200000)
     ];
 
     internal static readonly ModelAliasSeed[] Aliases =
@@ -29,6 +34,7 @@ internal static class PricingSeedData
         new("flash-deepinfra", "openrouter-deepinfra", "deepseek/deepseek-v4-flash-0731"),
         new("luna", "openrouter-flex", "openai/gpt-5.6-luna"),
         new("mimo", "openrouter", "xiaomi/mimo-v2.5-pro"),
-        new("mimo-fast", "openrouter", "xiaomi/mimo-v2.5")
+        new("mimo-fast", "openrouter", "xiaomi/mimo-v2.5"),
+        new("claude-haiku-4-5", "anthropic", "claude-haiku-4-5-20251001")
     ];
 }

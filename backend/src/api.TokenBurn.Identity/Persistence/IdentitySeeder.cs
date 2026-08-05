@@ -82,6 +82,7 @@ public sealed class IdentitySeeder(
                 OpenIddictConstants.Permissions.ResponseTypes.Code,
                 OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
                 OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+                OpenIddictConstants.Permissions.GrantTypes.Password,
                 OpenIddictConstants.Permissions.Prefixes.Scope + "insights.read",
                 OpenIddictConstants.Permissions.Prefixes.Scope + "ask.invoke",
                 OpenIddictConstants.Permissions.Prefixes.Scope + "admin"

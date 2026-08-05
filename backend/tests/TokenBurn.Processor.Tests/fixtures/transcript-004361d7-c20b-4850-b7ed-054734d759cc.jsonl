@@ -1,0 +1,12 @@
+{"type": "queue-operation", "timestamp": "2026-07-24T21:57:51.995Z", "sessionId": "004361d7-c20b-4850-b7ed-054734d759cc"}
+{"type": "queue-operation", "timestamp": "2026-07-24T21:57:51.996Z", "sessionId": "004361d7-c20b-4850-b7ed-054734d759cc"}
+{"type": "user", "timestamp": "2026-07-24T21:57:52.142Z", "sessionId": "004361d7-c20b-4850-b7ed-054734d759cc", "message": {"role": "user", "content": "<redacted>"}}
+{"type": "attachment", "timestamp": "2026-07-24T21:57:52.141Z", "sessionId": "004361d7-c20b-4850-b7ed-054734d759cc"}
+{"type": "attachment", "timestamp": "2026-07-24T21:57:52.141Z", "sessionId": "004361d7-c20b-4850-b7ed-054734d759cc"}
+{"type": "attachment", "timestamp": "2026-07-24T21:57:52.141Z", "sessionId": "004361d7-c20b-4850-b7ed-054734d759cc"}
+{"type": "assistant", "timestamp": "2026-07-24T21:57:54.880Z", "sessionId": "004361d7-c20b-4850-b7ed-054734d759cc", "message": {"role": "assistant", "model": "deepseek-v4-flash", "usage": {"input_tokens": 2805, "cache_read_input_tokens": 16640, "cache_creation_input_tokens": 0, "output_tokens": 96}, "content": "<redacted>"}}
+{"type": "assistant", "timestamp": "2026-07-24T21:57:54.884Z", "sessionId": "004361d7-c20b-4850-b7ed-054734d759cc", "message": {"role": "assistant", "model": "deepseek-v4-flash", "usage": {"input_tokens": 2805, "cache_read_input_tokens": 16640, "cache_creation_input_tokens": 0, "output_tokens": 96}, "content": "<redacted>"}}
+{"type": "user", "timestamp": "2026-07-24T21:57:54.896Z", "sessionId": "004361d7-c20b-4850-b7ed-054734d759cc", "message": {"role": "user", "content": "<redacted>"}}
+{"type": "last-prompt", "sessionId": "004361d7-c20b-4850-b7ed-054734d759cc"}
+{"type": "assistant", "timestamp": "2026-07-24T21:58:11.037Z", "sessionId": "004361d7-c20b-4850-b7ed-054734d759cc", "message": {"role": "assistant", "model": "deepseek-v4-flash", "usage": {"input_tokens": 5864, "cache_read_input_tokens": 16768, "cache_creation_input_tokens": 0, "output_tokens": 2170}, "content": "<redacted>"}}
+{"type": "assistant", "timestamp": "2026-07-24T21:58:11.470Z", "sessionId": "004361d7-c20b-4850-b7ed-054734d759cc", "message": {"role": "assistant", "model": "deepseek-v4-flash", "usage": {"input_tokens": 5864, "cache_read_input_tokens": 16768, "cache_creation_input_tokens": 0, "output_tokens": 2170}, "content": "<redacted>"}}

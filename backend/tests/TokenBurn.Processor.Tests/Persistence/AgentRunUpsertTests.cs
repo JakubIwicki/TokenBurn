@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using TokenBurn.Processor.Adapters;
 using TokenBurn.Processor.Domain;
 using TokenBurn.Processor.Persistence;
 using TokenBurn.Processor.Pricing;
 using TokenBurn.Processor.Tests.Bases;
-using TokenBurn.Processor.Tests.Fixtures;
 using TokenBurn.Testing.Common.Builders;
+using TokenBurn.Testing.Common.Mocking;
 
 namespace TokenBurn.Processor.Tests.Persistence;
 
@@ -19,6 +20,7 @@ public sealed class AgentRunUpsertTests : TelemetryHandlerTestBase
     {
         (PricingEngine engine, AgentRunUpserter upserter) = await CreateSeededPipelineAsync();
         AgentRun first = TestAgentRunBuilder.Init(Db)
+            .WithAgentId("")
             .WithModelSlug("deepseek-v4-flash")
             .WithInputTokens(1_000_000).WithCacheReadTokens(0).WithCacheWriteTokens(0).WithOutputTokens(0)
             .WithTime(OffPeakStart).Completed(OffPeakEnd)
@@ -53,6 +55,7 @@ public sealed class AgentRunUpsertTests : TelemetryHandlerTestBase
     {
         (PricingEngine engine, AgentRunUpserter upserter) = await CreateSeededPipelineAsync();
         AgentRun run = TestAgentRunBuilder.Init(Db)
+            .WithAgentId("")
             .WithModelSlug("deepseek-v4-flash")
             .WithInputTokens(1_000_000).WithCacheReadTokens(0).WithCacheWriteTokens(0).WithOutputTokens(0)
             .WithTime(OffPeakStart).Completed(OffPeakEnd)
@@ -77,6 +80,7 @@ public sealed class AgentRunUpsertTests : TelemetryHandlerTestBase
         var t2 = new DateTimeOffset(2026, 1, 2, 0, 0, 0, TimeSpan.Zero);
         var t1 = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
         AgentRun newer = TestAgentRunBuilder.Init(Db)
+            .WithAgentId("")
             .WithModelSlug("deepseek-v4-flash")
             .WithTime(t2).Completed(t2)
             .BuildWithoutDatabase();
@@ -98,14 +102,17 @@ public sealed class AgentRunUpsertTests : TelemetryHandlerTestBase
     public async Task Dedupes_CorpusBackfill_WhenRunTwice()
     {
         (PricingEngine engine, AgentRunUpserter upserter) = await CreateSeededPipelineAsync();
-        IReadOnlyList<AgentRun> runs = LedgerCorpusReader.Read(CorpusPath);
-        runs.Should().HaveCount(302);
+        IReadOnlyList<AgentRun> runs = new DelegateLedgerAdapter(MockLogger<DelegateLedgerAdapter>.GetSuccessful().Object)
+            .Map(File.ReadAllText(CorpusPath))
+            .Select(AgentRunEnvelopeMapper.ToAgentRun)
+            .ToList();
+        runs.Should().HaveCount(282);
 
         await BackfillAsync(runs, engine, upserter);
-        (await Context.AgentRuns.CountAsync()).Should().Be(302);
+        (await Context.AgentRuns.CountAsync()).Should().Be(282);
 
         await BackfillAsync(runs, engine, upserter);
-        (await Context.AgentRuns.CountAsync()).Should().Be(302);
+        (await Context.AgentRuns.CountAsync()).Should().Be(282);
     }
 
     private static string CorpusPath => Path.Combine(AppContext.BaseDirectory, "fixtures/reconciliation-ledger.jsonl");

@@ -1,10 +1,11 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using TokenBurn.Processor.Adapters;
 using TokenBurn.Processor.Domain;
 using TokenBurn.Processor.Persistence;
 using TokenBurn.Processor.Pricing;
 using TokenBurn.Processor.Tests.Bases;
-using TokenBurn.Processor.Tests.Fixtures;
+using TokenBurn.Testing.Common.Mocking;
 using Xunit.Abstractions;
 
 namespace TokenBurn.Processor.Tests.Pricing;
@@ -19,8 +20,11 @@ public sealed class PricingReconciliationTests : TelemetryHandlerTestBase
     public async Task Reconciles_CorpusCosts_AgainstThePinnedSet()
     {
         await new PricingSeeder(Context).SeedAsync();
-        IReadOnlyList<AgentRun> runs = LedgerCorpusReader.Read(CorpusPath);
-        runs.Should().HaveCount(302);
+        IReadOnlyList<AgentRun> runs = new DelegateLedgerAdapter(MockLogger<DelegateLedgerAdapter>.GetSuccessful().Object)
+            .Map(File.ReadAllText(CorpusPath))
+            .Select(AgentRunEnvelopeMapper.ToAgentRun)
+            .ToList();
+        runs.Should().HaveCount(282);
 
         var engine = new PricingEngine(Context);
         var upserter = new AgentRunUpserter(Context);
@@ -38,7 +42,7 @@ public sealed class PricingReconciliationTests : TelemetryHandlerTestBase
             Math.Abs(row.CostUsd!.Value - entry.ReportedCostUsd).Should().BeLessThanOrEqualTo(0.000001m);
         }
 
-        (await Context.AgentRuns.CountAsync()).Should().Be(302);
+        (await Context.AgentRuns.CountAsync()).Should().Be(282);
 
         ReportCoverage(runs, pinned);
     }
@@ -69,7 +73,7 @@ public sealed class PricingReconciliationTests : TelemetryHandlerTestBase
             .Sum(r => (r.InputTokens ?? 0) + (r.CacheReadTokens ?? 0) + (r.OutputTokens ?? 0));
         double coveragePct = totalTokens == 0 ? 0 : 100.0 * pinnedTokens / totalTokens;
         _output.WriteLine(
-            $"Reconciliation: resolved={runs.Count}, pinned={pinned.Count}, token_coverage={coveragePct:F1}% ({pinnedTokens}/{totalTokens})");
+            $"Reconciliation: merged_sessions={runs.Count}, pinned={pinned.Count}, token_coverage={coveragePct:F1}% ({pinnedTokens}/{totalTokens})");
     }
 
     private sealed record PinnedEntry(string SessionId, string AgentId, decimal ReportedCostUsd);

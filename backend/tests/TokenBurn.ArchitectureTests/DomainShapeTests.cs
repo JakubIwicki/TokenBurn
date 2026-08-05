@@ -30,8 +30,8 @@ public sealed class DomainShapeTests
             "vacuity guard — the convention must find at least one domain aggregate; " +
             "a zero scan means the domain-entity discovery is broken");
 
-        result.ScannedCount.Should().Be(4,
-            "the domain aggregates are AgentRun, Envelope, OutboxMessage, and IdentityUser; " +
+        result.ScannedCount.Should().Be(5,
+            "the domain aggregates are AgentRun, Envelope, OutboxMessage, IdentityUser, and ImportCommand; " +
             "bump this deliberately when an aggregate is added");
 
         result.Violations.Should().BeEmpty(

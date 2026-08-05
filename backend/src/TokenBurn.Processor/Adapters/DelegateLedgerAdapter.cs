@@ -1,104 +1,124 @@
 using System.Globalization;
 using System.Text.Json;
-using TokenBurn.Processor.Domain;
+using Microsoft.Extensions.Logging;
+using TokenBurn.Contracts;
 
 namespace TokenBurn.Processor.Adapters;
 
-public sealed class DelegateLedgerAdapter
+/// <summary>
+///     Maps delegate ledger rows (ledger.jsonl) to normalized run envelopes.
+///     A session's multiple delegate-handle rows collapse into ONE run keyed
+///     (session_id, agent_id="") per the session = run spec: tokens and cost are
+///     summed, and the max-cost row contributes external id, persona, model and
+///     status. Session identity comes from session_id, derived from the handle
+///     when blank; a row with neither is skipped with a logged reason (rule 2a).
+/// </summary>
+public sealed class DelegateLedgerAdapter(ILogger<DelegateLedgerAdapter> logger)
 {
-    public IReadOnlyList<AgentRun> Map(string otlpJson)
+    public IReadOnlyList<NormalizedRun> Map(string ledgerJsonl)
     {
-        using JsonDocument document = JsonDocument.Parse(otlpJson);
-        List<AgentRun> runs = [];
-        if (!document.RootElement.TryGetProperty("resourceSpans", out JsonElement resources))
-            return runs;
-
-        foreach (JsonElement resourceSpan in resources.EnumerateArray())
+        Dictionary<string, List<LedgerRow>> bySession = new(StringComparer.Ordinal);
+        foreach (string line in ledgerJsonl.Split('\n'))
         {
-            JsonElement resource = resourceSpan.GetProperty("resource");
-            string? sessionId = ReadAttribute(resource, "session.id", AttributeKind.String);
-            string source = ReadAttribute(resource, "tokenburn.source", AttributeKind.String) ?? "delegate-ledger";
-            if (!string.Equals(source, "delegate-ledger", StringComparison.Ordinal))
+            if (string.IsNullOrWhiteSpace(line))
                 continue;
-
-            if (!resourceSpan.TryGetProperty("scopeSpans", out JsonElement scopes))
+            using JsonDocument document = JsonDocument.Parse(line);
+            JsonElement row = document.RootElement;
+            string handle = ReadString(row, "handle") ?? "";
+            if (OtlpGenAiAdapter.IsTestHandle(handle))
                 continue;
-            foreach (JsonElement scope in scopes.EnumerateArray())
+            string sessionId = ReadString(row, "session_id") ?? "";
+            string resolvedSessionId = string.IsNullOrWhiteSpace(sessionId) ? handle : sessionId;
+            // Rule 2a: never key a run under a blank identity — ('','') would collapse
+            // distinct rows into one. Skip rows with no session id and no handle.
+            if (string.IsNullOrWhiteSpace(resolvedSessionId))
             {
-                if (!scope.TryGetProperty("spans", out JsonElement spans))
-                    continue;
-                foreach (JsonElement span in spans.EnumerateArray())
-                {
-                    string? externalId = ReadAttribute(span, "tokenburn.handle", AttributeKind.String);
-                    if (IsTestHandle(externalId))
-                        continue;
-                    string resolvedSessionId = string.IsNullOrWhiteSpace(sessionId) ? externalId ?? "" : sessionId;
-                    // Rule 2a: never key a run under a blank identity — ('','') would collapse
-                    // distinct spans into one row. Skip spans with no session id and no handle.
-                    if (string.IsNullOrWhiteSpace(resolvedSessionId))
-                        continue;
-
-                    runs.Add(AgentRun.Create(
-                        resolvedSessionId,
-                        externalId ?? "",
-                        source,
-                        externalId,
-                        ReadAttribute(span, "tokenburn.persona", AttributeKind.String),
-                        ReadAttribute(span, "gen_ai.request.model", AttributeKind.String),
-                        LedgerStatus.FromLedger(ReadAttribute(span, "tokenburn.status", AttributeKind.String)),
-                        ReadTime(span, "startTimeUnixNano"),
-                        ReadTime(span, "endTimeUnixNano"),
-                        ReadLong(span, "gen_ai.usage.input_tokens"),
-                        ReadLong(span, "gen_ai.usage.cache_read_tokens"),
-                        ReadLong(span, "gen_ai.usage.cache_write_tokens"),
-                        ReadLong(span, "gen_ai.usage.output_tokens"),
-                        ReadDecimal(span, "tokenburn.cost_usd")));
-                }
+                logger.LogWarning("Skipping ledger row with blank session identity (no session_id and no handle).");
+                continue;
             }
-        }
-        return runs;
-    }
 
-    public static bool IsTestHandle(string? handle)
-        => !string.IsNullOrWhiteSpace(handle) &&
-           (string.Equals(handle, "test", StringComparison.OrdinalIgnoreCase) ||
-            handle.StartsWith("test-", StringComparison.OrdinalIgnoreCase));
-
-    private static DateTimeOffset? ReadTime(JsonElement span, string property)
-    {
-        if (!span.TryGetProperty(property, out JsonElement value) ||
-            !long.TryParse(value.GetString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out long nanos))
-            return null;
-        return DateTimeOffset.FromUnixTimeMilliseconds(nanos / 1_000_000);
-    }
-
-    private static long? ReadLong(JsonElement span, string key)
-        => long.TryParse(ReadAttribute(span, key, AttributeKind.Int), NumberStyles.Integer, CultureInfo.InvariantCulture, out long value) ? value : null;
-
-    private static decimal? ReadDecimal(JsonElement span, string key)
-        => decimal.TryParse(ReadAttribute(span, key, AttributeKind.Double), NumberStyles.Float, CultureInfo.InvariantCulture, out decimal value) ? value : null;
-
-    private static string? ReadAttribute(JsonElement owner, string key, AttributeKind kind)
-    {
-        if (!owner.TryGetProperty("attributes", out JsonElement attributes))
-            return null;
-        foreach (JsonElement attribute in attributes.EnumerateArray())
-        {
-            if (!string.Equals(attribute.GetProperty("key").GetString(), key, StringComparison.Ordinal))
-                continue;
-            if (!attribute.TryGetProperty("value", out JsonElement value))
-                return null;
-            string property = kind switch
+            if (!bySession.TryGetValue(resolvedSessionId, out List<LedgerRow>? group))
             {
-                AttributeKind.String => "stringValue",
-                AttributeKind.Int => "intValue",
-                AttributeKind.Double => "doubleValue",
-                _ => ""
-            };
-            return value.TryGetProperty(property, out JsonElement result) ? result.ToString() : null;
+                group = [];
+                bySession.Add(resolvedSessionId, group);
+            }
+            group.Add(ReadRow(row, handle));
         }
-        return null;
+        return bySession.Select(Merge).ToList();
     }
 
-    private enum AttributeKind { String, Int, Double }
+    private static LedgerRow ReadRow(JsonElement row, string handle)
+    {
+        DateTimeOffset startedAt = DateTimeOffset.Parse(
+            row.GetProperty("ts").GetString()!,
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.AssumeUniversal);
+        double durationSeconds = row.TryGetProperty("duration_s", out JsonElement duration) &&
+            duration.ValueKind == JsonValueKind.Number &&
+            duration.TryGetDouble(out double parsedDuration)
+                ? parsedDuration
+                : 0;
+        return new LedgerRow(
+            handle,
+            ReadString(row, "persona"),
+            ReadString(row, "model"),
+            LedgerStatus.FromLedger(ReadString(row, "status")),
+            startedAt,
+            startedAt.AddSeconds(durationSeconds),
+            ReadLong(row, "miss_tokens"),
+            ReadLong(row, "hit_tokens"),
+            ReadLong(row, "output_tokens"),
+            ReadDecimal(row, "cost_usd"));
+    }
+
+    private static NormalizedRun Merge(KeyValuePair<string, List<LedgerRow>> group)
+    {
+        // Max-cost row wins for external id, persona, model and status; a strict
+        // greater-than keeps the earlier row on cost ties.
+        LedgerRow maxCost = group.Value[0];
+        foreach (LedgerRow row in group.Value.Skip(1))
+        {
+            if ((row.CostUsd ?? 0) > (maxCost.CostUsd ?? 0))
+                maxCost = row;
+        }
+
+        return new NormalizedRun
+        {
+            SessionId = group.Key,
+            AgentId = "",
+            Source = "delegate-ledger",
+            ExternalId = string.IsNullOrWhiteSpace(maxCost.Handle) ? null : maxCost.Handle,
+            Persona = maxCost.Persona,
+            ModelSlug = maxCost.ModelSlug,
+            Status = maxCost.Status,
+            StartedAt = group.Value.Min(row => row.StartedAt),
+            EndedAt = group.Value.Max(row => row.EndedAt),
+            InputTokens = group.Value.Sum(row => row.InputTokens ?? 0),
+            CacheReadTokens = group.Value.Sum(row => row.CacheReadTokens ?? 0),
+            CacheWriteTokens = 0,
+            OutputTokens = group.Value.Sum(row => row.OutputTokens ?? 0),
+            ReportedCostUsd = group.Value.Sum(row => row.CostUsd)
+        };
+    }
+
+    private static string? ReadString(JsonElement row, string property)
+        => row.TryGetProperty(property, out JsonElement value) ? value.GetString() : null;
+
+    private static long? ReadLong(JsonElement row, string property)
+        => row.TryGetProperty(property, out JsonElement value) && value.TryGetInt64(out long parsed) ? parsed : null;
+
+    private static decimal? ReadDecimal(JsonElement row, string property)
+        => row.TryGetProperty(property, out JsonElement value) && value.TryGetDecimal(out decimal parsed) ? parsed : null;
+
+    private sealed record LedgerRow(
+        string Handle,
+        string? Persona,
+        string? ModelSlug,
+        RunStatus Status,
+        DateTimeOffset StartedAt,
+        DateTimeOffset EndedAt,
+        long? InputTokens,
+        long? CacheReadTokens,
+        long? OutputTokens,
+        decimal? CostUsd);
 }

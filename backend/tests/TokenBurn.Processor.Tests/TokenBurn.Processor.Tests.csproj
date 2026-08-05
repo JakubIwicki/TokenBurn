@@ -4,10 +4,18 @@
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio"><PrivateAssets>all</PrivateAssets></PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <ProjectReference Include="../../src/TokenBurn.Processor/TokenBurn.Processor.csproj" />
     <ProjectReference Include="../TokenBurn.Testing.Common/TokenBurn.Testing.Common.csproj" />
     <None Include="fixtures/reconciliation-ledger.jsonl" CopyToOutputDirectory="PreserveNewest" />
     <None Include="fixtures/reconciliation-comparison-set.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="fixtures/transcript-004361d7-c20b-4850-b7ed-054734d759cc.jsonl" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="fixtures/transcript-084aea47-5ae6-48dd-a5ca-c3d8c626c46a.jsonl" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="fixtures/transcript-00e942db-e64f-4e9e-99d9-f89c8d96d78b.jsonl" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="fixtures/delegate-run-log-sample.jsonl" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="fixtures/jicaching-sample.jsonl" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../TokenBurn.EndToEnd.Tests/Fixtures/delegate-ledger.otlp.json" Link="fixtures/delegate-ledger.otlp.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../TokenBurn.EndToEnd.Tests/Fixtures/delegate-ledger-shared-session.otlp.json" Link="fixtures/delegate-ledger-shared-session.otlp.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

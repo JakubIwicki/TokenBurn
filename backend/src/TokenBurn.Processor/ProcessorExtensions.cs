@@ -5,8 +5,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TokenBurn.Common.Primitives;
+using TokenBurn.Common.Security;
+using TokenBurn.Contracts;
 using TokenBurn.Processor.Adapters;
+using TokenBurn.Processor.Commands;
 using TokenBurn.Processor.Domain;
+using TokenBurn.Processor.Features.Imports;
 using TokenBurn.Processor.Persistence;
 using TokenBurn.Processor.Pricing;
 
@@ -19,15 +23,23 @@ public static class ProcessorExtensions
         string connectionString = builder.Configuration.GetConnectionString("Processor")
             ?? throw new InvalidOperationException("ConnectionStrings:Processor must be configured.");
         builder.Services.AddHealthChecks();
+        builder.AddTokenBurnJwtAuth();
         builder.Services.AddDbContext<TelemetryDbContext>(options =>
             options.UseNpgsql(connectionString, npgsql => npgsql.MigrationsAssembly(typeof(TelemetryDbContext).Assembly.FullName)
                 .MigrationsHistoryTable("__EFMigrationsHistory", "telemetry")));
         builder.Services.AddSingleton(TimeProvider.System);
+        builder.Services.AddSingleton<OtlpGenAiAdapter>();
         builder.Services.AddSingleton<DelegateLedgerAdapter>();
+        builder.Services.AddSingleton<DelegateRunLogAdapter>();
+        builder.Services.AddSingleton<ClaudeCodeTranscriptAdapter>();
+        builder.Services.AddSingleton<JiCachingAdapter>();
+        builder.Services.AddSingleton<SourceDispatcher>();
         builder.Services.AddScoped<PricingSeeder>();
         builder.Services.AddScoped<PricingEngine>();
         builder.Services.AddScoped<AgentRunUpserter>();
+        builder.Services.AddScoped<IImportCommandExecutor, ClaudeCodeTranscriptImportExecutor>();
         builder.Services.AddHostedService<TelemetryRawConsumer>();
+        builder.Services.AddHostedService<ImportCommandWorker>();
         return builder;
     }
 
@@ -41,8 +53,10 @@ public static class ProcessorExtensions
 
     public static WebApplication MapProcessorEndpoints(this WebApplication app)
     {
+        app.UseTokenBurnAuth();
         app.MapHealthChecks("/health");
         app.MapHealthChecks("/health/ready");
+        app.MapImportsEndpoints();
         return app;
     }
 }
@@ -73,11 +87,12 @@ internal sealed class TelemetryRawConsumer(
                 {
                     result = consumer.Consume(stoppingToken);
                     using IServiceScope scope = scopeFactory.CreateScope();
-                    DelegateLedgerAdapter adapter = scope.ServiceProvider.GetRequiredService<DelegateLedgerAdapter>();
+                    SourceDispatcher dispatcher = scope.ServiceProvider.GetRequiredService<SourceDispatcher>();
                     PricingEngine engine = scope.ServiceProvider.GetRequiredService<PricingEngine>();
                     AgentRunUpserter upserter = scope.ServiceProvider.GetRequiredService<AgentRunUpserter>();
-                    foreach (AgentRun run in adapter.Map(result.Message.Value))
+                    foreach (NormalizedRun envelope in dispatcher.Map(result.Message.Value))
                     {
+                        AgentRun run = AgentRunEnvelopeMapper.ToAgentRun(envelope);
                         Result pricing = await engine.PriceRunAsync(run, stoppingToken);
                         if (!pricing.IsSuccess)
                             logger.LogWarning("Pricing run {RunId} failed: {Error}", run.Id, pricing.ErrorMessage);

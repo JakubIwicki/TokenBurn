@@ -1,19 +1,23 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using TokenBurn.Processor.Persistence;
+using TokenBurn.Processor.Pricing;
 using TokenBurn.Processor.Tests.Bases;
+using TokenBurn.Testing.Common.Assertions;
 
 namespace TokenBurn.Processor.Tests.Pricing;
 
 public sealed class PricingSeederTests : TelemetryHandlerTestBase
 {
+    private static readonly DateTimeOffset ResolveAsOf = new(2026, 1, 1, 0, 30, 0, TimeSpan.Zero);
+
     [Fact]
-    public async Task Seeds_FivePricesAndElevenAliases()
+    public async Task Seeds_TenPricesAndTwelveAliases()
     {
         await new PricingSeeder(Context).SeedAsync();
 
-        (await Context.ModelPrices.CountAsync()).Should().Be(5);
-        (await Context.ModelAliases.CountAsync()).Should().Be(11);
+        (await Context.ModelPrices.CountAsync()).Should().Be(10);
+        (await Context.ModelAliases.CountAsync()).Should().Be(12);
     }
 
     [Fact]
@@ -22,8 +26,8 @@ public sealed class PricingSeederTests : TelemetryHandlerTestBase
         await new PricingSeeder(Context).SeedAsync();
         await new PricingSeeder(Context).SeedAsync();
 
-        (await Context.ModelPrices.CountAsync()).Should().Be(5);
-        (await Context.ModelAliases.CountAsync()).Should().Be(11);
+        (await Context.ModelPrices.CountAsync()).Should().Be(10);
+        (await Context.ModelAliases.CountAsync()).Should().Be(12);
     }
 
     [Fact]
@@ -44,6 +48,17 @@ public sealed class PricingSeederTests : TelemetryHandlerTestBase
         PostgresException exception = await Assert.ThrowsAsync<PostgresException>(InsertOverlappingPriceAsync);
 
         exception.SqlState.Should().Be("23P01");
+    }
+
+    [Fact]
+    public async Task Seeds_AnthropicPrices_ResolvableThroughEngine()
+    {
+        await new PricingSeeder(Context).SeedAsync();
+
+        PriceRow opus = (await new PricingEngine(Context).ResolveAsync("claude-opus-5", "anthropic", ResolveAsOf, CancellationToken.None)).AssertSuccess();
+
+        (await Context.ModelPrices.CountAsync(p => p.Service == "anthropic")).Should().Be(5);
+        opus.InputPerMtok.Should().Be(5.00m);
     }
 
     private async Task<string?> ReadSentinelEffectiveFromAsync()

@@ -48,14 +48,16 @@ public sealed class AgentRun : BaseEntity<Guid>
         string sessionId, string agentId, string source, string? externalId, string? persona,
         string? modelSlug, RunStatus status, DateTimeOffset? startedAt,
         DateTimeOffset? endedAt, long? inputTokens, long? cacheReadTokens,
-        long? cacheWriteTokens, long? outputTokens, decimal? reportedCostUsd)
+        long? cacheWriteTokens, long? outputTokens, decimal? reportedCostUsd,
+        string? service = null, string? workspace = null, Guid? parentRunId = null)
         => new()
         {
             Id = Guid.NewGuid(), SessionId = sessionId, AgentId = agentId ?? "",
             Source = source, ExternalId = externalId, Persona = persona, ModelSlug = modelSlug,
-            Service = null, Status = status, StartedAt = startedAt,
+            Service = service, Status = status, StartedAt = startedAt,
             EndedAt = endedAt, InputTokens = inputTokens,
             CacheReadTokens = cacheReadTokens, CacheWriteTokens = cacheWriteTokens, OutputTokens = outputTokens,
+            ParentRunId = parentRunId, Workspace = workspace,
             ReportedCostUsd = reportedCostUsd, Version = 1
         };
 

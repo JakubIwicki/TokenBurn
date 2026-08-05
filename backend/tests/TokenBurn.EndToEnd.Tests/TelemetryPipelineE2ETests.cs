@@ -1,6 +1,7 @@
 extern alias ingest;
 extern alias processor;
 
+using System.Globalization;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
@@ -19,7 +20,8 @@ using Testcontainers.PostgreSql;
 using IngestDb = ingest::Api.TokenBurn.Ingest.IngestDbContext;
 using TelemetryDb = processor::TokenBurn.Processor.Persistence.TelemetryDbContext;
 using AgentRun = processor::TokenBurn.Processor.Domain.AgentRun;
-using DelegateLedgerAdapter = processor::TokenBurn.Processor.Adapters.DelegateLedgerAdapter;
+using AgentRunEnvelopeMapper = processor::TokenBurn.Processor.Domain.AgentRunEnvelopeMapper;
+using OtlpGenAiAdapter = processor::TokenBurn.Processor.Adapters.OtlpGenAiAdapter;
 using RunStatus = processor::TokenBurn.Processor.Domain.RunStatus;
 using PricingStatus = processor::TokenBurn.Processor.Domain.PricingStatus;
 using LedgerStatus = processor::TokenBurn.Processor.Adapters.LedgerStatus;
@@ -127,38 +129,46 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
     }
 
     [Fact]
-    public async Task MultipleHandlesInOneSession_ProduceDistinctRuns()
+    public async Task MultipleHandlesInOneSession_MergeIntoOneRun()
     {
         SharedSessionFixture fixture = LoadSharedSessionFixture();
+        Assert.Equal(2, fixture.DistinctHandles.Count);
 
         using HttpResponseMessage response = await PostAsync(fixture.Json);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         bool converged = await WaitUntilAsync(
-            async () => await CountAgentRunsForSessionsAsync([fixture.SessionId]) == fixture.DistinctHandles.Count,
+            async () => await CountAgentRunsForSessionsAsync([fixture.SessionId]) == 1,
             PipelineTimeout);
-        Assert.True(converged, $"Ledger did not converge to {fixture.DistinctHandles.Count} runs for shared session {fixture.SessionId}.");
+        Assert.True(converged, $"Ledger did not converge to a single merged run for shared session {fixture.SessionId}.");
 
         Assert.Equal(1, await CountEnvelopesForBodyAsync(fixture.Json));
         Assert.Equal(1, await CountOutboxForKeyAsync(fixture.SessionId));
-        foreach (string handle in fixture.DistinctHandles)
-        {
-            AgentRun run = await LoadAgentRunAsync(fixture.SessionId, handle);
-            Assert.NotNull(run);
-        }
+        AgentRun run = await LoadAgentRunAsync(fixture.SessionId, "");
+        Assert.Equal("", run.AgentId);
+        Assert.Equal(fixture.ExpectedExternalId, run.ExternalId);
+        Assert.Equal(fixture.ExpectedModel, run.ModelSlug);
+        Assert.Equal(RunStatus.Completed, run.Status);
+        Assert.Equal(fixture.ExpectedInputTokens, run.InputTokens);
+        Assert.Equal(fixture.ExpectedCacheReadTokens, run.CacheReadTokens);
+        Assert.Equal(fixture.ExpectedCacheWriteTokens, run.CacheWriteTokens);
+        Assert.Equal(fixture.ExpectedOutputTokens, run.OutputTokens);
+        Assert.Equal(fixture.ExpectedReportedCostUsd, run.ReportedCostUsd);
+        Assert.Equal(PricingStatus.Priced, run.PricingStatus);
+        Assert.Equal(1.0m, run.PriceMultiplier);
     }
 
     [Fact]
-    public async Task SameHandleRedelivered_StaysOneRun()
+    public async Task SameSessionRedelivered_StaysOneRun()
     {
         SharedSessionFixture fixture = LoadSharedSessionFixture();
 
         using HttpResponseMessage seed = await PostAsync(fixture.Json);
         Assert.Equal(HttpStatusCode.OK, seed.StatusCode);
         bool seeded = await WaitUntilAsync(
-            async () => await CountAgentRunsForSessionsAsync([fixture.SessionId]) == fixture.DistinctHandles.Count,
+            async () => await CountAgentRunsForSessionsAsync([fixture.SessionId]) == 1,
             PipelineTimeout);
-        Assert.True(seeded, $"Ledger did not converge to {fixture.DistinctHandles.Count} runs before redelivery.");
+        Assert.True(seeded, $"Ledger did not converge to a single merged run before redelivery.");
 
         using IProducer<string, string> producer = BuildRawProducer(_fixture.KafkaBootstrapServers);
         await producer.ProduceAsync(TopicName, new Message<string, string>
@@ -169,18 +179,14 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
         producer.Flush(TimeSpan.FromSeconds(10));
 
         DateTimeOffset watchDeadline = TimeProvider.System.GetUtcNow().Add(RedeliveryWatchWindow);
-        bool stayed = true;
         do
         {
             await Task.Delay(TimeSpan.FromMilliseconds(250));
-            stayed = await CountAgentRunsForSessionsAsync([fixture.SessionId]) == fixture.DistinctHandles.Count;
-            Assert.True(stayed, "Redelivering the same (session_id, handle) keys must not grow the run count.");
-            foreach (string handle in fixture.DistinctHandles)
-            {
-                Assert.Equal(1, await CountAgentRunsForHandleAsync(fixture.SessionId, handle));
-            }
+            // Redelivering the same (session_id, "") key must not grow the run count.
+            Assert.Equal(1, await CountAgentRunsForSessionsAsync([fixture.SessionId]));
+            Assert.Equal(1, await CountAgentRunsForHandleAsync(fixture.SessionId, ""));
         } while (TimeProvider.System.GetUtcNow() < watchDeadline);
-        Assert.Equal(fixture.DistinctHandles.Count, await CountAgentRunsForSessionsAsync([fixture.SessionId]));
+        Assert.Equal(1, await CountAgentRunsForSessionsAsync([fixture.SessionId]));
     }
 
     [Fact]
@@ -199,7 +205,7 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
             PipelineTimeout);
         Assert.True(converged, $"Progress run did not converge to a single row for session {ProgressSessionId}.");
 
-        AgentRun run = await LoadAgentRunAsync(ProgressSessionId, ProgressHandle);
+        AgentRun run = await LoadAgentRunAsync(ProgressSessionId, "");
         Assert.Equal(RunStatus.Completed, run.Status);
     }
 
@@ -225,7 +231,7 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
         do
         {
             await Task.Delay(TimeSpan.FromMilliseconds(250));
-            AgentRun run = await LoadAgentRunAsync(CompletedSurvivesSessionId, CompletedSurvivesHandle);
+            AgentRun run = await LoadAgentRunAsync(CompletedSurvivesSessionId, "");
             Assert.Equal(RunStatus.Completed, run.Status);
             Assert.Equal(ProgressEndTime, run.EndedAt);
         } while (TimeProvider.System.GetUtcNow() < watchDeadline);
@@ -253,11 +259,11 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
         producer.Flush(TimeSpan.FromSeconds(10));
 
         bool applied = await WaitUntilAsync(
-            async () => (await LoadAgentRunAsync(TieSessionId, TieHandle)).InputTokens == 9999,
+            async () => (await LoadAgentRunAsync(TieSessionId, "")).InputTokens == 9999,
             PipelineTimeout);
         Assert.True(applied, "A same-ended_at redelivery must be applied by the >= tie branch without regressing the completion marker.");
 
-        AgentRun run = await LoadAgentRunAsync(TieSessionId, TieHandle);
+        AgentRun run = await LoadAgentRunAsync(TieSessionId, "");
         Assert.Equal(RunStatus.Completed, run.Status);
         Assert.Equal(ProgressEndTime, run.EndedAt);
         Assert.Equal(1, await CountAgentRunsForSessionsAsync([TieSessionId]));
@@ -311,7 +317,7 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
         Assert.Equal(fixture.SpotPersona, run.Persona);
         Assert.Equal(fixture.SpotInputTokens, run.InputTokens);
         Assert.Equal(fixture.SpotCacheWriteTokens, run.CacheWriteTokens);
-        Assert.Equal(LedgerStatus.FromLedger(fixture.SpotStatus), run.Status);
+        Assert.Equal(AgentRunEnvelopeMapper.ToRunStatus(LedgerStatus.FromLedger(fixture.SpotStatus)), run.Status);
         Assert.Equal(PricingStatus.Priced, run.PricingStatus);
         Assert.Equal(1.0m, run.PriceMultiplier);
     }
@@ -372,7 +378,7 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
             foreach (JsonElement span in scope.GetProperty("spans").EnumerateArray())
             {
                 string? handle = ReadAttribute(span, "tokenburn.handle", "stringValue");
-                if (DelegateLedgerAdapter.IsTestHandle(handle))
+                if (OtlpGenAiAdapter.IsTestHandle(handle))
                     continue;
 
                 string resolvedSessionId = string.IsNullOrWhiteSpace(sessionId) ? handle ?? "" : sessionId;
@@ -402,18 +408,48 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
         JsonElement resourceSpan = document.RootElement.GetProperty("resourceSpans").EnumerateArray().Single();
         string sessionId = ReadAttribute(resourceSpan.GetProperty("resource"), "session.id", "stringValue")!;
         HashSet<string> handles = new(StringComparer.Ordinal);
+        long inputTokens = 0;
+        long cacheReadTokens = 0;
+        long cacheWriteTokens = 0;
+        long outputTokens = 0;
+        decimal reportedCostUsd = 0m;
+        decimal maxCost = -1m;
+        string? maxCostHandle = null;
+        string? maxCostModel = null;
         foreach (JsonElement scope in resourceSpan.GetProperty("scopeSpans").EnumerateArray())
         foreach (JsonElement span in scope.GetProperty("spans").EnumerateArray())
         {
             string? handle = ReadAttribute(span, "tokenburn.handle", "stringValue");
-            if (DelegateLedgerAdapter.IsTestHandle(handle))
+            if (OtlpGenAiAdapter.IsTestHandle(handle))
                 continue;
             if (handle is not null)
             {
                 handles.Add(handle);
             }
+            decimal? spanCost = ReadDecimal(span, "tokenburn.cost_usd");
+            if ((spanCost ?? 0) > maxCost)
+            {
+                maxCost = spanCost ?? 0;
+                maxCostHandle = handle;
+                maxCostModel = ReadAttribute(span, "gen_ai.request.model", "stringValue");
+            }
+            inputTokens += ReadLong(span, "gen_ai.usage.input_tokens") ?? 0;
+            cacheReadTokens += ReadLong(span, "gen_ai.usage.cache_read_tokens") ?? 0;
+            cacheWriteTokens += ReadLong(span, "gen_ai.usage.cache_write_tokens") ?? 0;
+            outputTokens += ReadLong(span, "gen_ai.usage.output_tokens") ?? 0;
+            reportedCostUsd += spanCost ?? 0m;
         }
-        return new SharedSessionFixture(json, sessionId, handles.ToArray());
+        return new SharedSessionFixture(
+            json,
+            sessionId,
+            handles.ToArray(),
+            maxCostHandle ?? throw new InvalidOperationException("Shared-session fixture contains no delegate-ledger span."),
+            maxCostModel ?? throw new InvalidOperationException("Shared-session fixture contains no model."),
+            inputTokens,
+            cacheReadTokens,
+            cacheWriteTokens,
+            outputTokens,
+            reportedCostUsd);
     }
 
     private static string? ReadAttribute(JsonElement owner, string key, string valueProperty)
@@ -435,6 +471,9 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
 
     private static long? ReadLong(JsonElement span, string key)
         => long.TryParse(ReadAttribute(span, key, "intValue"), out long value) ? value : null;
+
+    private static decimal? ReadDecimal(JsonElement span, string key)
+        => decimal.TryParse(ReadAttribute(span, key, "doubleValue"), NumberStyles.Float, CultureInfo.InvariantCulture, out decimal value) ? value : null;
 
     private static string BuildDelegateLedgerPayload(string sessionId, string handle, bool includeEndTime, string? status, long inputTokens = 4200, long cacheWriteTokens = 0)
     {
@@ -504,7 +543,14 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
     private sealed record SharedSessionFixture(
         string Json,
         string SessionId,
-        IReadOnlyList<string> DistinctHandles);
+        IReadOnlyList<string> DistinctHandles,
+        string ExpectedExternalId,
+        string ExpectedModel,
+        long ExpectedInputTokens,
+        long ExpectedCacheReadTokens,
+        long ExpectedCacheWriteTokens,
+        long ExpectedOutputTokens,
+        decimal ExpectedReportedCostUsd);
 }
 
 public sealed class TelemetryPipelineE2EFixture : IAsyncLifetime
@@ -549,6 +595,7 @@ public sealed class TelemetryPipelineE2EFixture : IAsyncLifetime
         ProcessorFactory = new WebApplicationFactory<processor::Program>().WithWebHostBuilder(builder =>
         {
             builder.UseSetting("ConnectionStrings:Processor", pgConnection);
+            builder.UseSetting("Jwt:Authority", "http://localhost/connect");
             builder.UseSetting("Kafka:BootstrapServers", kafkaAddress);
         });
 

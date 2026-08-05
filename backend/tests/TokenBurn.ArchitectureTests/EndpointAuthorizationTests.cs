@@ -195,6 +195,7 @@ public sealed class EndpointAuthorizationTests
             {
                 b.Configuration["ConnectionStrings:Processor"] =
                     "Host=localhost;Database=processor;Username=test;Password=test";
+                b.Configuration["Jwt:Authority"] = "http://localhost/connect";
                 ProcessorServiceHost.AddProcessorServices(b);
             },
             a => ProcessorServiceHost.MapProcessorEndpoints(a));
@@ -220,7 +221,7 @@ public sealed class EndpointAuthorizationTests
         // Bump this const deliberately when an endpoint is added — a silently
         // shrinking count is the exact failure mode that lets an endpoint
         // escape the authorization scan.
-        const int expectedScannedPairCount = 2;
+        const int expectedScannedPairCount = 4;
         result.ScannedCount.Should().Be(expectedScannedPairCount,
             $"the authorization convention must scan exactly {expectedScannedPairCount} method+pattern pairs " +
             $"(one per mapped endpoint); a count drop means endpoints escaped the scan");
