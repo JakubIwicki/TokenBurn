@@ -26,4 +26,5 @@ public sealed class SearchRunHit
     [JsonPropertyName("output_tokens")] public long? OutputTokens { get; init; }
     [JsonPropertyName("cost_usd")] public decimal? CostUsd { get; init; }
     [JsonPropertyName("reported_cost_usd")] public decimal? ReportedCostUsd { get; init; }
+    [JsonPropertyName("searchable_text")] public string SearchableText { get; init; } = null!;
 }

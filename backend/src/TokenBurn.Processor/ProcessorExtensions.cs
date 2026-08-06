@@ -4,15 +4,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ElasticsearchClient = Elastic.Clients.Elasticsearch.ElasticsearchClient;
 using TokenBurn.Common.Primitives;
 using TokenBurn.Common.Security;
 using TokenBurn.Contracts;
 using TokenBurn.Processor.Adapters;
 using TokenBurn.Processor.Commands;
+using TokenBurn.Processor.Documents;
+using TokenBurn.Processor.Documents.Indexing;
 using TokenBurn.Processor.Domain;
 using TokenBurn.Processor.Features.Imports;
 using PricingStatus = TokenBurn.Processor.Domain.PricingStatus;
 using TokenBurn.Processor.Infrastructure;
+using TokenBurn.Processor.Infrastructure.Embeddings;
 using TokenBurn.Processor.Infrastructure.Indexing;
 using TokenBurn.Processor.Persistence;
 using TokenBurn.Processor.Pricing;
@@ -46,16 +50,37 @@ public static class ProcessorExtensions
         builder.Services.AddSingleton(WasteDetectionOptions.FromConfiguration(builder.Configuration));
         builder.Services.AddScoped<WasteDetectionService>();
         builder.Services.AddScoped<IImportCommandExecutor, ClaudeCodeTranscriptImportExecutor>();
+        // Documents import pipeline: deterministic chunker, content-hash dedupe, and the
+        // executor riding the import_commands lifecycle. The documents ES index has exactly
+        // one writer (the executor), so no fan-out coordination is needed. The Lazy client
+        // defers Elasticsearch:Uri validation to execution, so the imports endpoint (which
+        // enumerates every executor) keeps working on hosts without Elasticsearch configured.
+        builder.Services.AddSingleton(sp => new Lazy<ElasticsearchClient>(sp.GetRequiredService<ElasticsearchClient>));
+        builder.Services.AddSingleton(sp => new Lazy<IEmbeddingClient>(sp.GetRequiredService<IEmbeddingClient>));
+        builder.Services.AddSingleton(DocumentsOptions.FromConfiguration(builder.Configuration));
+        builder.Services.AddScoped<DocumentsUpserter>();
+        builder.Services.AddScoped<DocumentChunkUpserter>();
+        builder.Services.AddSingleton<TextChunker>();
+        builder.Services.AddSingleton<DocumentIndexTemplateInitializer>();
+        builder.Services.AddScoped<IImportCommandExecutor, DocumentsImportExecutor>();
         builder.Services.AddSingleton<KafkaTopicInitializer>();
         builder.Services.AddProcessorElasticsearchClient(builder.Configuration);
         builder.Services.AddSingleton<SearchIndexTemplateInitializer>();
         builder.Services.AddSingleton<IRunIndexer, ElasticsearchRunIndexer>();
         builder.Services.AddScoped<RunReplayService>();
+        // Embeddings chain: options + HttpClient + client, the text builder, and
+        // the scoped embedder. The hosted consumer is registered unconditionally
+        // and no-ops when Processor:Embeddings:Enabled is not true (default),
+        // mirroring how the replay trigger is gated.
+        builder.Services.AddEmbeddingServices(builder.Configuration);
+        builder.Services.AddSingleton<RunEmbeddingTextBuilder>();
+        builder.Services.AddScoped<RunEmbedder>();
         // Replay first (it re-publishes agent_runs as PricedRun; the index
         // consumer is Earliest and catches up), then the live consumers.
         builder.Services.AddHostedService<RunReplayTrigger>();
         builder.Services.AddHostedService<TelemetryRawConsumer>();
         builder.Services.AddHostedService<PricedRunIndexConsumer>();
+        builder.Services.AddHostedService<EmbeddedRunConsumer>();
         builder.Services.AddHostedService<WasteDetectionConsumer>();
         builder.Services.AddHostedService<ImportCommandWorker>();
         return builder;

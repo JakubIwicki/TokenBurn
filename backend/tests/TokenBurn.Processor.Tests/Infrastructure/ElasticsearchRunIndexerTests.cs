@@ -6,11 +6,13 @@ using Elastic.Clients.Elasticsearch.IndexManagement;
 using Elastic.Clients.Elasticsearch.Mapping;
 using Microsoft.Extensions.Logging.Abstractions;
 using TokenBurn.Contracts;
+using TokenBurn.Processor.Infrastructure.Embeddings;
 using TokenBurn.Processor.Infrastructure.Indexing;
 using TokenBurn.Testing.Common.Data;
 
 namespace TokenBurn.Processor.Tests.Infrastructure;
 
+[Collection("elasticsearch")]
 public sealed class ElasticsearchRunIndexerTests : IAsyncLifetime
 {
     private const string IndexName = ElasticsearchFixture.TracesIndex;
@@ -45,6 +47,8 @@ public sealed class ElasticsearchRunIndexerTests : IAsyncLifetime
             .ToList();
 
         mappedFields.Should().Contain("workspace");
+        mappedFields.Should().Contain("embedding");
+        mappedFields.Should().Contain("embedding_text");
 
         string[] documentFields = typeof(RunIndexDocument)
             .GetProperties()
@@ -53,7 +57,10 @@ public sealed class ElasticsearchRunIndexerTests : IAsyncLifetime
             .Cast<string>()
             .ToArray();
 
-        mappedFields.Should().BeEquivalentTo(documentFields);
+        // The template maps exactly the RunIndexDocument fields PLUS the two embedding fields
+        // the Phase 5 embedder writes via partial update — those are not part of the index-time
+        // document shape, so parity admits them explicitly.
+        mappedFields.Should().BeEquivalentTo(documentFields.Concat(["embedding", "embedding_text"]));
     }
 
     [Fact]
@@ -126,7 +133,10 @@ public sealed class ElasticsearchRunIndexerTests : IAsyncLifetime
     {
         ElasticsearchFixture fixture = await SharedElasticsearch.GetFixtureAsync();
         _client = fixture.CreateClient();
-        _templateInitializer = new SearchIndexTemplateInitializer(_client, NullLogger<SearchIndexTemplateInitializer>.Instance);
+        _templateInitializer = new SearchIndexTemplateInitializer(
+            _client,
+            NullLogger<SearchIndexTemplateInitializer>.Instance,
+            new EmbeddingsOptions(Uri: null, BatchSize: 64, Dims: 384, Timeout: TimeSpan.FromSeconds(120), MaxRunChars: 4000));
         _sut = new ElasticsearchRunIndexer(_client, _templateInitializer);
     }
 

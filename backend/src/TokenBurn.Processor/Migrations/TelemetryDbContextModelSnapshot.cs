@@ -288,6 +288,91 @@ namespace TokenBurn.Processor.Migrations
                         });
                 });
 
+            modelBuilder.Entity("TokenBurn.Processor.Domain.SearchDocument", b =>
+                {
+                    b.Property<long>("StoredId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("StoredId"));
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("content_hash");
+
+                    b.Property<DateTimeOffset>("IndexedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("indexed_at");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("source");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("title");
+
+                    b.Property<string>("Uri")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("uri");
+
+                    b.HasKey("StoredId");
+
+                    b.HasIndex("ContentHash")
+                        .IsUnique();
+
+                    b.ToTable("documents", "search");
+                });
+
+            modelBuilder.Entity("TokenBurn.Processor.Domain.SearchDocumentChunk", b =>
+                {
+                    b.Property<long>("StoredId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("StoredId"));
+
+                    b.Property<string>("ChunkText")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("chunk_text");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("content_hash");
+
+                    b.Property<long>("DocumentId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("document_id");
+
+                    b.Property<int>("Ordinal")
+                        .HasColumnType("integer")
+                        .HasColumnName("ordinal");
+
+                    b.Property<int>("TokenCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("token_count");
+
+                    b.HasKey("StoredId");
+
+                    b.HasIndex("DocumentId", "Ordinal")
+                        .IsUnique();
+
+                    b.ToTable("document_chunks", "search");
+                });
+
             modelBuilder.Entity("TokenBurn.Processor.Domain.WasteFinding", b =>
                 {
                     b.Property<Guid>("Id")
@@ -437,6 +522,15 @@ namespace TokenBurn.Processor.Migrations
                     b.HasOne("TokenBurn.Processor.Domain.AgentRun", null)
                         .WithMany()
                         .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TokenBurn.Processor.Domain.SearchDocumentChunk", b =>
+                {
+                    b.HasOne("TokenBurn.Processor.Domain.SearchDocument", null)
+                        .WithMany()
+                        .HasForeignKey("DocumentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -7,12 +7,14 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Logging.Abstractions;
 using Npgsql;
+using TokenBurn.Common.Pagination;
 using TokenBurn.Contracts;
 using TokenBurn.Processor.Infrastructure.Indexing;
 using TokenBurn.Testing.Common.Data;
 
 namespace Api.TokenBurn.Insights.Tests;
 
+[Collection("insights-search")]
 public sealed class SearchEndpointTests : IAsyncLifetime
 {
     private const string IndexName = ElasticsearchFixture.TracesIndex;
@@ -106,6 +108,37 @@ public sealed class SearchEndpointTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ReturnsBadRequest_WhenHybridCursorIsMalformed()
+    {
+        using HttpResponseMessage response = await ActAsync("?q=acme&mode=hybrid&cursor=garbage");
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        await AssertErrorsAsync(response);
+    }
+
+    [Fact]
+    public async Task ReturnsBadRequest_WhenKeywordCursorUsedWithHybridMode()
+    {
+        string keywordCursor = CursorCodec.Encode(new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero), Guid.NewGuid());
+
+        using HttpResponseMessage response = await ActAsync($"?q=acme&mode=hybrid&cursor={Uri.EscapeDataString(keywordCursor)}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        await AssertErrorsAsync(response);
+    }
+
+    [Fact]
+    public async Task ReturnsBadRequest_WhenHybridCursorUsedWithKeywordMode()
+    {
+        string hybridCursor = HybridCursorCodec.Encode(0.032522, "01234567-89ab-cdef-0123-456789abcdef");
+
+        using HttpResponseMessage response = await ActAsync($"?q=acme&cursor={Uri.EscapeDataString(hybridCursor)}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        await AssertErrorsAsync(response);
+    }
+
+    [Fact]
     public async Task ReturnsEmptyHits_WhenIndexDoesNotExist()
     {
         await _es.Indices.DeleteAsync(IndexName, CancellationToken.None);
@@ -116,15 +149,6 @@ public sealed class SearchEndpointTests : IAsyncLifetime
         (await ReadTotalAsync(response)).Should().Be(0);
         (await ReadHitIdsAsync(response)).Should().BeEmpty();
         (await ReadNextCursorAsync(response)).Should().BeNull();
-    }
-
-    [Fact]
-    public async Task ReturnsBadRequest_WhenModeIsHybrid()
-    {
-        using HttpResponseMessage response = await ActAsync("?q=acme&mode=hybrid");
-
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        await AssertErrorsAsync(response);
     }
 
     [Fact]

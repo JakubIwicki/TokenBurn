@@ -6,11 +6,13 @@
              xmlns:viewsRd="clr-namespace:TokenBurn.Desktop.Features.RunDetail"
              xmlns:viewsSearch="clr-namespace:TokenBurn.Desktop.Features.Search"
              xmlns:viewsFindings="clr-namespace:TokenBurn.Desktop.Features.Findings"
+             xmlns:viewsAsk="clr-namespace:TokenBurn.Desktop.Features.Ask"
              xmlns:dashVm="clr-namespace:TokenBurn.Desktop.Core.Features.Dashboard;assembly=TokenBurn.Desktop.Core"
              xmlns:runsVm="clr-namespace:TokenBurn.Desktop.Core.Features.Runs;assembly=TokenBurn.Desktop.Core"
              xmlns:rdVm="clr-namespace:TokenBurn.Desktop.Core.Features.RunDetail;assembly=TokenBurn.Desktop.Core"
              xmlns:searchVm="clr-namespace:TokenBurn.Desktop.Core.Features.Search;assembly=TokenBurn.Desktop.Core"
-             xmlns:findVm="clr-namespace:TokenBurn.Desktop.Core.Features.Findings;assembly=TokenBurn.Desktop.Core">
+             xmlns:findVm="clr-namespace:TokenBurn.Desktop.Core.Features.Findings;assembly=TokenBurn.Desktop.Core"
+             xmlns:askVm="clr-namespace:TokenBurn.Desktop.Core.Features.Ask;assembly=TokenBurn.Desktop.Core">
 
     <UserControl.Resources>
         <Style x:Key="DashboardNavStyle" TargetType="Button" BasedOn="{StaticResource NavItemStyle}">
@@ -40,6 +42,14 @@
         <Style x:Key="FindingsNavStyle" TargetType="Button" BasedOn="{StaticResource NavItemStyle}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding ActiveFeature}" Value="Findings">
+                    <Setter Property="Background" Value="{StaticResource SelectionBrush}" />
+                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="AskNavStyle" TargetType="Button" BasedOn="{StaticResource NavItemStyle}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ActiveFeature}" Value="Ask">
                     <Setter Property="Background" Value="{StaticResource SelectionBrush}" />
                     <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
                 </DataTrigger>
@@ -129,6 +139,25 @@
                         <TextBlock Text="Findings" Margin="8,0,0,0" />
                     </StackPanel>
                 </Button>
+
+                <Button Command="{Binding ShowAskCommand}" Style="{StaticResource AskNavStyle}"
+                        Visibility="{Binding HasAskScope, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="▸" FontSize="{StaticResource FontSizeData}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ActiveFeature}" Value="Ask">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Text="Ask" Margin="8,0,0,0" />
+                    </StackPanel>
+                </Button>
             </StackPanel>
         </Border>
 
@@ -150,6 +179,9 @@
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type findVm:FindingsViewModel}">
                         <viewsFindings:FindingsView />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type askVm:AskViewModel}">
+                        <viewsAsk:AskView />
                     </DataTemplate>
                 </ContentControl.Resources>
             </ContentControl>

@@ -12,6 +12,8 @@ public sealed class TelemetryDbContext(DbContextOptions<TelemetryDbContext> opti
     public DbSet<ModelPrice> ModelPrices => Set<ModelPrice>();
     public DbSet<ModelAlias> ModelAliases => Set<ModelAlias>();
     public DbSet<ImportCommand> ImportCommands => Set<ImportCommand>();
+    public DbSet<SearchDocument> SearchDocuments => Set<SearchDocument>();
+    public DbSet<SearchDocumentChunk> SearchDocumentChunks => Set<SearchDocumentChunk>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -22,5 +24,7 @@ public sealed class TelemetryDbContext(DbContextOptions<TelemetryDbContext> opti
         modelBuilder.ApplyConfiguration(new ModelPriceConfiguration());
         modelBuilder.ApplyConfiguration(new ModelAliasConfiguration());
         modelBuilder.ApplyConfiguration(new ImportCommandConfiguration());
+        modelBuilder.ApplyConfiguration(new SearchDocumentConfiguration());
+        modelBuilder.ApplyConfiguration(new SearchDocumentChunkConfiguration());
     }
 }

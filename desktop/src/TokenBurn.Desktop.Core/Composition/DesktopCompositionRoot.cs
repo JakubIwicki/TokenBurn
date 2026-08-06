@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using TokenBurn.Desktop.Core.Features.Ask;
 using TokenBurn.Desktop.Core.Features.BurnTicker;
 using TokenBurn.Desktop.Core.Features.Dashboard;
 using TokenBurn.Desktop.Core.Features.Findings;
@@ -55,6 +56,7 @@ public static class DesktopCompositionRoot
         services.AddSingleton<RunDetailViewModel>();
         services.AddSingleton<SearchViewModel>();
         services.AddSingleton<FindingsViewModel>();
+        services.AddSingleton<AskViewModel>();
         services.AddSingleton<BurnTickerViewModel>();
 
         return services;

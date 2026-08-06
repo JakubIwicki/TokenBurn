@@ -31,11 +31,19 @@ public sealed class OpenApiEndpointTests
             .ToList();
         paths.Should().Contain("/api/runs");
         paths.Should().Contain("/api/findings");
+        paths.Should().Contain("/api/ask");
 
         JsonElement pathsElement = body.RootElement.GetProperty("paths");
         QueryParameterNames(pathsElement.GetProperty("/api/search")).Should().Contain("Q");
         QueryParameterNames(pathsElement.GetProperty("/api/runs")).Should().Contain(["From", "MinCost"]);
         QueryParameterNames(pathsElement.GetProperty("/api/findings")).Should().Contain("Acknowledged");
+        JsonElement askPost = pathsElement.GetProperty("/api/ask").GetProperty("post");
+        IReadOnlyList<string> askContentTypes = askPost.GetProperty("requestBody")
+            .GetProperty("content")
+            .EnumerateObject()
+            .Select(entry => entry.Name)
+            .ToList();
+        askContentTypes.Should().Contain("application/json");
     }
 
     private static IReadOnlyList<string> QueryParameterNames(JsonElement pathItem)

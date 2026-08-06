@@ -168,7 +168,9 @@ public sealed class EndpointAuthorizationTests
         // shrinking count is the exact failure mode that lets an endpoint
         // escape the authorization scan.
         // 7 -> 8 is deliberate: /api/costs/summary was added in Phase 7 Part A2.
-        const int expectedScannedPairCount = 8;
+        // 8 -> 9 is deliberate: /api/ask was added in Phase 5 Slice D (ask is authed, so no
+        // allow-list entry is added).
+        const int expectedScannedPairCount = 9;
         result.ScannedCount.Should().Be(expectedScannedPairCount,
             $"the authorization convention must scan exactly {expectedScannedPairCount} method+pattern pairs " +
             $"(one per mapped endpoint); a count drop means endpoints escaped the scan");

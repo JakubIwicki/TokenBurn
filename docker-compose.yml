@@ -136,6 +136,10 @@ services:
       Elasticsearch__Uri: ${ELASTICSEARCH_URI:?ELASTICSEARCH_URI must be set}
       Elasticsearch__Username: ${ELASTICSEARCH_USERNAME:?ELASTICSEARCH_USERNAME must be set}
       Elasticsearch__Password: ${ELASTIC_PASSWORD:?ELASTIC_PASSWORD must be set}
+      Embeddings__Uri: ${EMBEDDINGS_URI:-}
+      Ask__Provider: ${ASK_PROVIDER:-fake}
+      Ask__DeepSeekApiKey: ${ASK_DEEPSEEK_API_KEY:-}
+      Ask__DeepSeekEndpoint: ${ASK_DEEPSEEK_ENDPOINT:-}
       Jwt__Authority: ${JWT_AUTHORITY_URL:?JWT_AUTHORITY_URL must be set}
       Jwt__MetadataAddress: ${JWT_METADATA_ADDRESS:?JWT_METADATA_ADDRESS must be set}
     networks: [tokenburn]
@@ -166,8 +170,14 @@ services:
       Jwt__Authority: ${JWT_AUTHORITY_URL:?JWT_AUTHORITY_URL must be set}
       Jwt__MetadataAddress: ${JWT_METADATA_ADDRESS:?JWT_METADATA_ADDRESS must be set}
       Processor__Replay__Enabled: ${PROCESSOR_REPLAY_ENABLED:-false}
+      Processor__Embeddings__Enabled: ${PROCESSOR_EMBEDDINGS_ENABLED:-false}
+      Documents__ChunkMaxTokens: ${DOCUMENTS_CHUNK_MAX_TOKENS:-512}
+      Documents__TokenCharsPerToken: ${DOCUMENTS_TOKEN_CHARS_PER_TOKEN:-4}
+      Documents__MaxFileBytes: ${DOCUMENTS_MAX_FILE_BYTES:-5000000}
+      Documents__EmbeddingBatchSize: ${DOCUMENTS_EMBEDDING_BATCH_SIZE:-64}
     volumes:
       - ${CLAUDE_TRANSCRIPTS_DIR:?CLAUDE_TRANSCRIPTS_DIR must be set}:/data/transcripts:ro
+      - ${DOCUMENTS_DIR:?DOCUMENTS_DIR must be set}:/data/documents:ro
     networks: [tokenburn]
     depends_on:
       postgres: {condition: service_healthy}

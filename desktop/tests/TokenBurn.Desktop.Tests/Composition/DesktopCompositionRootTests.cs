@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using TokenBurn.Desktop.Core.Composition;
+using TokenBurn.Desktop.Core.Features.Ask;
 using TokenBurn.Desktop.Core.Services;
 using TokenBurn.Desktop.Core.Services.Generated;
 using TokenBurn.Desktop.Core.Settings;
@@ -42,6 +43,7 @@ public sealed class DesktopCompositionRootTests
         provider.GetRequiredService<RunDetailViewModel>().Should().NotBeNull();
         provider.GetRequiredService<SearchViewModel>().Should().NotBeNull();
         provider.GetRequiredService<FindingsViewModel>().Should().NotBeNull();
+        provider.GetRequiredService<AskViewModel>().Should().NotBeNull();
         provider.GetRequiredService<BurnTickerViewModel>().Should().NotBeNull();
 
         var client = provider.GetRequiredService<IInsightsApiClient>();

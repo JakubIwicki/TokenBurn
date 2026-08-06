@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using TokenBurn.Desktop.Core.Features.Ask;
 using TokenBurn.Desktop.Core.Features.BurnTicker;
 using TokenBurn.Desktop.Core.Features.Common;
 using TokenBurn.Desktop.Core.Features.Dashboard;
@@ -25,6 +26,7 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
     private readonly RunDetailViewModel _runDetail;
     private readonly SearchViewModel _search;
     private readonly FindingsViewModel _findings;
+    private readonly AskViewModel _ask;
     private readonly BurnTickerViewModel _burnTicker;
 
     public ShellViewModel(
@@ -35,6 +37,7 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
         RunDetailViewModel runDetail,
         SearchViewModel search,
         FindingsViewModel findings,
+        AskViewModel ask,
         BurnTickerViewModel burnTicker)
     {
         _session = session;
@@ -44,6 +47,7 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
         _runDetail = runDetail;
         _search = search;
         _findings = findings;
+        _ask = ask;
         _burnTicker = burnTicker;
 
         IsAuthenticated = session.IsAuthenticated;
@@ -56,7 +60,11 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
         _burnTicker.Activate();
     }
 
-    public IReadOnlyList<string> Features { get; } = ["Dashboard", "Runs", "Search", "Findings"];
+    [ObservableProperty]
+    private IReadOnlyList<string> _features = [];
+
+    [ObservableProperty]
+    private bool _hasAskScope;
 
     [ObservableProperty]
     private bool _isAuthenticated;
@@ -130,6 +138,9 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void ShowFindings() => ShowFeature(_findings, "Findings");
 
+    [RelayCommand]
+    private void ShowAsk() => ShowFeature(_ask, "Ask");
+
     private void ShowFeature(object viewModel, string name)
     {
         if (ActiveView is IActivatable outgoing)
@@ -155,6 +166,23 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
             IsAuthenticated = false;
             GrantedScopes = [];
         });
+
+    // Fired by the source-generated GrantedScopes setter on every change (ctor, sign-in/out,
+    // unauthenticated) — feature navigation is derived from the granted scopes.
+    partial void OnGrantedScopesChanged(IReadOnlyList<string> value)
+    {
+        Features = BuildFeatures(value ?? []);
+        HasAskScope = value?.Contains("ask.invoke") ?? false;
+        _ask.ApplyScopes(value ?? []);
+    }
+
+    private static IReadOnlyList<string> BuildFeatures(IReadOnlyList<string> scopes)
+    {
+        var list = new List<string>();
+        if (scopes.Contains("insights.read")) list.AddRange(["Dashboard", "Runs", "Search", "Findings"]);
+        if (scopes.Contains("ask.invoke")) list.Add("Ask");
+        return list;
+    }
 
     private void OnRunsPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {

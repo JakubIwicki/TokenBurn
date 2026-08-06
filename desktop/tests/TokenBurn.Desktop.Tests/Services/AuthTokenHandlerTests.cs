@@ -1,3 +1,5 @@
+using System.Text;
+
 using TokenBurn.Desktop.Core.Services;
 
 namespace TokenBurn.Desktop.Tests.Services;
@@ -9,6 +11,12 @@ public sealed class AuthTokenHandlerTests
 
     private static HttpRequestMessage Get(string url = "https://localhost/api/runs") =>
         new(HttpMethod.Get, url);
+
+    private static HttpRequestMessage Post(string url = "https://localhost/api/ask") =>
+        new(HttpMethod.Post, url)
+        {
+            Content = new StringContent("""{"question":"hello"}""", Encoding.UTF8, "application/json")
+        };
 
     private static HttpClient Client(HttpMessageHandler inner, Mock<IAuthSession> session) =>
         new(new AuthTokenHandler(session.Object) { InnerHandler = inner });
@@ -46,6 +54,32 @@ public sealed class AuthTokenHandlerTests
         inner.Requests.Should().HaveCount(2);
         inner.Requests[0].Headers.Authorization!.Parameter.Should().Be("old-access");
         inner.Requests[1].Headers.Authorization!.Parameter.Should().Be("new-access");
+        session.Verify(s => s.RefreshTokenAsync(It.IsAny<CancellationToken>()), Times.Once());
+        session.Verify(s => s.SignOutAsync(It.IsAny<CancellationToken>()), Times.Never());
+    }
+
+    [Fact]
+    public async Task SendAsync_When401Post_RetriesWithReBufferedBody()
+    {
+        var session = new Mock<IAuthSession>();
+        session.Setup(s => s.GetTokenAsync(It.IsAny<CancellationToken>())).ReturnsAsync(ValidBundle);
+        session.Setup(s => s.RefreshTokenAsync(It.IsAny<CancellationToken>())).ReturnsAsync(RefreshedBundle);
+        var inner = QueueHttpHandler.Sequence(HttpStatusCode.Unauthorized, HttpStatusCode.OK);
+        var capture = new BodyCaptureHandler { InnerHandler = inner };
+        using var client = Client(capture, session);
+
+        var response = await client.SendAsync(Post(), CancellationToken.None);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        inner.Requests.Should().HaveCount(2);
+        inner.Requests.Should().OnlyContain(r => r.Method == HttpMethod.Post);
+        inner.Requests[0].Headers.Authorization!.Parameter.Should().Be("old-access");
+        inner.Requests[1].Headers.Authorization!.Parameter.Should().Be("new-access");
+        inner.Requests[1].Content.Should().BeOfType<ByteArrayContent>();
+        inner.Requests[1].Content.Should().NotBeSameAs(inner.Requests[0].Content);
+        inner.Requests[1].Content!.Headers.ContentType.Should().Be(inner.Requests[0].Content!.Headers.ContentType);
+        capture.Bodies[0].Should().Equal(capture.Bodies[1]);
+        capture.Bodies[1].Should().Equal(Encoding.UTF8.GetBytes("""{"question":"hello"}"""));
         session.Verify(s => s.RefreshTokenAsync(It.IsAny<CancellationToken>()), Times.Once());
         session.Verify(s => s.SignOutAsync(It.IsAny<CancellationToken>()), Times.Never());
     }
@@ -157,6 +191,22 @@ public sealed class AuthTokenHandlerTests
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.Unauthorized));
             }
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+        }
+    }
+
+    /// <summary>
+    /// Snapshots each request's body bytes at send time, before the HttpClient pipeline disposes the
+    /// request content — so the retry's re-buffered body can be asserted after the send completes.
+    /// </summary>
+    private sealed class BodyCaptureHandler : DelegatingHandler
+    {
+        public List<byte[]> Bodies { get; } = [];
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            if (request.Content is not null)
+                Bodies.Add(await request.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false));
+            return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

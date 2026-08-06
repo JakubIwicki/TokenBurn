@@ -3,9 +3,9 @@ using MediatR;
 namespace Api.TokenBurn.Insights.Features.Search;
 
 /// <summary>
-///     Keyword search over the <c>traces</c> Elasticsearch index. <c>Mode</c> is
-///     <c>keyword</c> by default; <c>hybrid</c> is rejected until Phase 5 ships
-///     the embedding chain.
+///     Search over the <c>traces</c> Elasticsearch index. <c>Mode</c> is
+///     <c>keyword</c> by default; <c>hybrid</c> fuses a keyword and a vector leg
+///     with reciprocal rank fusion.
 /// </summary>
 public sealed record SearchQuery(
     string? Q,

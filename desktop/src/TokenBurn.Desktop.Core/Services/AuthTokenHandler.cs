@@ -32,7 +32,7 @@ public sealed class AuthTokenHandler : DelegatingHandler
             return response; // the refresh leader already signed out; surface the 401
 
         response.Dispose();
-        using var retryRequest = CloneForRetry(request);
+        using var retryRequest = await CloneForRetryAsync(request, cancellationToken).ConfigureAwait(false);
         retryRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", refreshed.AccessToken);
         var retry = await base.SendAsync(retryRequest, cancellationToken).ConfigureAwait(false);
         if (retry.StatusCode == HttpStatusCode.Unauthorized)
@@ -81,17 +81,24 @@ public sealed class AuthTokenHandler : DelegatingHandler
     /// <summary>
     /// Rebuilds a request for the single retry. HttpRequestMessage can only be sent once, so the
     /// retry needs a fresh instance; headers carry over (Authorization is overwritten by the caller).
-    /// The Insights API is GET-only, so the content is shared as-is.
+    /// The first send consumed the content stream, so the retry re-buffers the body via
+    /// <c>ReadAsByteArrayAsync</c> — StringContent is buffered, so the full body is still available.
+    /// A fresh <see cref="ByteArrayContent"/> plus an explicit copy of the content headers
+    /// (Content-Type, Content-Length — which the previous clone lost) makes POST retries work. The
+    /// GET path (<c>request.Content is null</c>) behaves byte-for-byte as before.
     /// </summary>
-    private static HttpRequestMessage CloneForRetry(HttpRequestMessage request)
+    private static async Task<HttpRequestMessage> CloneForRetryAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var clone = new HttpRequestMessage(request.Method, request.RequestUri)
-        {
-            Version = request.Version,
-            Content = request.Content,
-        };
+        var clone = new HttpRequestMessage(request.Method, request.RequestUri) { Version = request.Version };
         foreach (var (key, value) in request.Headers)
             clone.Headers.TryAddWithoutValidation(key, value);
+        if (request.Content is not null)
+        {
+            byte[] body = await request.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+            clone.Content = new ByteArrayContent(body);
+            foreach (var (key, value) in request.Content.Headers)
+                clone.Content.Headers.TryAddWithoutValidation(key, value);
+        }
         return clone;
     }
 }

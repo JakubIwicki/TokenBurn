@@ -25,6 +25,9 @@ public sealed class ElasticsearchRunIndexer(
         }
 
         RunIndexDocument document = RunIndexDocumentMapper.FromPricedRun(run);
+        // The full-document overwrite drops the embedder's embedding/embedding_text fields; the
+        // chained telemetry.indexed consumer re-writes them via partial update. Order (priced →
+        // indexed → embedded), not field ownership, is what keeps telemetry-pipeline rule 8.
         IndexResponse response = await client.IndexAsync(document, IndexName, run.Id.ToString("D"), cancellationToken);
         if (!response.IsValidResponse)
             throw new InvalidOperationException(

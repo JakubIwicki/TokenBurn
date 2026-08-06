@@ -1,3 +1,4 @@
+using TokenBurn.Desktop.Core.Features.Ask;
 using TokenBurn.Desktop.Core.Features.RunDetail;
 using TokenBurn.Desktop.Core.Features.Shell;
 using TokenBurn.Desktop.Core.Services.Generated;
@@ -19,6 +20,7 @@ public sealed class ShellViewModelTests
         public RunDetailViewModel RunDetail { get; }
         public SearchViewModel Search { get; }
         public FindingsViewModel Findings { get; }
+        public AskViewModel Ask { get; }
         public BurnTickerViewModel BurnTicker { get; }
         public ShellViewModel Sut { get; }
 
@@ -43,15 +45,18 @@ public sealed class ShellViewModelTests
                     Messages = [],
                     Findings = [],
                 });
+            Api.Setup(a => a.AskAsync(It.IsAny<AskRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new AskResponse { Answer = "", Citations = [], Retrieval = [], PricingCoverage = 0 });
 
             Dashboard = new DashboardViewModel(Dispatcher, Api.Object, Loop);
             Runs = new RunsViewModel(Dispatcher, Api.Object, Loop);
             RunDetail = new RunDetailViewModel(Dispatcher, Api.Object);
             Search = new SearchViewModel(Dispatcher, Api.Object);
             Findings = new FindingsViewModel(Dispatcher, Api.Object, Loop);
+            Ask = new AskViewModel(Dispatcher, Api.Object);
             BurnTicker = new BurnTickerViewModel(Dispatcher, Api.Object, Loop, Clock);
 
-            Sut = new ShellViewModel(Session.Object, Dispatcher, Dashboard, Runs, RunDetail, Search, Findings, BurnTicker);
+            Sut = new ShellViewModel(Session.Object, Dispatcher, Dashboard, Runs, RunDetail, Search, Findings, Ask, BurnTicker);
         }
     }
 
@@ -114,6 +119,78 @@ public sealed class ShellViewModelTests
 
         fx.Sut.IsAuthenticated.Should().BeFalse();
         fx.Sut.GrantedScopes.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task ShowAsk_SwitchesActiveFeatureAndView()
+    {
+        var fx = new Fixture();
+        fx.Session.Setup(s => s.SignInAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        fx.Session.SetupGet(s => s.IsAuthenticated).Returns(true);
+        fx.Session.SetupGet(s => s.GrantedScopes).Returns(["insights.read", "ask.invoke"]);
+
+        await fx.Sut.SignInCommand.ExecuteAsync(null);
+
+        fx.Sut.ShowAskCommand.Execute(null);
+
+        fx.Sut.ActiveFeature.Should().Be("Ask");
+        fx.Sut.ActiveView.Should().BeSameAs(fx.Ask);
+    }
+
+    [Fact]
+    public async Task Features_DeriveFromScopes()
+    {
+        var fx = new Fixture();
+        fx.Session.Setup(s => s.SignInAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        fx.Session.SetupGet(s => s.IsAuthenticated).Returns(true);
+        fx.Session.SetupGet(s => s.GrantedScopes).Returns(["insights.read"]);
+
+        await fx.Sut.SignInCommand.ExecuteAsync(null);
+
+        fx.Sut.Features.Should().Equal(["Dashboard", "Runs", "Search", "Findings"]);
+        fx.Sut.HasAskScope.Should().BeFalse();
+
+        fx.Session.SetupGet(s => s.GrantedScopes).Returns(["insights.read", "ask.invoke"]);
+        await fx.Sut.SignInCommand.ExecuteAsync(null);
+
+        fx.Sut.Features.Should().EndWith("Ask");
+        fx.Sut.HasAskScope.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task SignOut_DropsAskScopeAndAskFeature()
+    {
+        var fx = new Fixture();
+        fx.Session.Setup(s => s.SignInAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        fx.Session.SetupGet(s => s.IsAuthenticated).Returns(true);
+        fx.Session.SetupGet(s => s.GrantedScopes).Returns(["insights.read", "ask.invoke"]);
+
+        await fx.Sut.SignInCommand.ExecuteAsync(null);
+
+        fx.Session.SetupGet(s => s.IsAuthenticated).Returns(false);
+        fx.Session.SetupGet(s => s.GrantedScopes).Returns([]);
+        fx.Session.Setup(s => s.SignOutAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+        await fx.Sut.SignOutCommand.ExecuteAsync(null);
+
+        fx.Sut.HasAskScope.Should().BeFalse();
+        fx.Sut.Features.Should().NotContain("Ask");
+    }
+
+    [Fact]
+    public async Task Unauthenticated_DropsAskScopeAndAskFeature()
+    {
+        var fx = new Fixture();
+        fx.Session.Setup(s => s.SignInAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        fx.Session.SetupGet(s => s.IsAuthenticated).Returns(true);
+        fx.Session.SetupGet(s => s.GrantedScopes).Returns(["insights.read", "ask.invoke"]);
+
+        await fx.Sut.SignInCommand.ExecuteAsync(null);
+
+        fx.Session.Raise(s => s.Unauthenticated += null, EventArgs.Empty);
+
+        fx.Sut.HasAskScope.Should().BeFalse();
+        fx.Sut.Features.Should().NotContain("Ask");
     }
 
     [Fact]

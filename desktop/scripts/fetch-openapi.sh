@@ -140,7 +140,7 @@ with open(sys.argv[1], encoding="utf-8") as f:
     spec = json.load(f)
 
 paths = spec.get("paths", {})
-expected = ["/api/search", "/api/runs", "/api/costs/summary", "/api/findings"]
+expected = ["/api/search", "/api/runs", "/api/costs/summary", "/api/findings", "/api/ask"]
 
 print("Paths in snapshot:")
 for p in sorted(paths):
@@ -165,7 +165,15 @@ if not query_params:
     print("ERROR: /api/runs GET exposes no query parameters (A1 query-param refactor not live?).", file=sys.stderr)
     sys.exit(1)
 print(f"/api/runs GET query params: {', '.join(query_params)}")
-print("Completeness OK: all expected /api/* paths present (incl. note: /api/runs/{id} listed above).")
+
+# Proof the ask endpoint accepts the documented JSON request body.
+ask_path = paths.get("/api/ask", {}).get("post", {})
+ask_content = ask_path.get("requestBody", {}).get("content", {})
+if "application/json" not in ask_content:
+    print("ERROR: /api/ask POST has no application/json request body.", file=sys.stderr)
+    sys.exit(1)
+print("/api/ask POST requestBody: application/json")
+print("Completeness OK: all expected /api/* paths present (incl. /api/ask POST + /api/runs/{id} note).")
 PY
 
 if grep -q '"in": *"query"' "$OUT_FILE"; then

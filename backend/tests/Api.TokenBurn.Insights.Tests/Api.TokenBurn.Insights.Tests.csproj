@@ -5,6 +5,7 @@
     <PackageReference Include="xunit.runner.visualstudio"><PrivateAssets>all</PrivateAssets></PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <ProjectReference Include="../../src/api.TokenBurn.Insights/api.TokenBurn.Insights.csproj" />
     <ProjectReference Include="../../src/TokenBurn.Processor/TokenBurn.Processor.csproj" />
     <ProjectReference Include="../TokenBurn.Testing.Common/TokenBurn.Testing.Common.csproj" />

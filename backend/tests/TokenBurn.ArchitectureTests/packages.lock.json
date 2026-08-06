@@ -188,6 +188,11 @@
         "resolved": "10.0.0",
         "contentHash": "TxHQq0kn0tpYs2ljeRl8jtmWk720B0nteqI6mAZM77HWJpYT9Zj8SkkBBlj8K3Yeq18a6NBjz6YutE+shEk4Ag=="
       },
+      "Microsoft.Extensions.AI.Abstractions": {
+        "type": "Transitive",
+        "resolved": "10.0.0",
+        "contentHash": "PHeuDm2tC6wJPEQvleUr2kNQaIMNqSf3aEbzkIPlZyQ0+0SYI9SwXVLdGD1NPBI+xB+Vb2lxZKhrFlIf9kP9WA=="
+      },
       "Microsoft.Extensions.AmbientMetadata.Application": {
         "type": "Transitive",
         "resolved": "10.0.0",
@@ -599,6 +604,11 @@
           "Microsoft.IdentityModel.Tokens": "8.0.1"
         }
       },
+      "System.Numerics.Tensors": {
+        "type": "Transitive",
+        "resolved": "10.0.0",
+        "contentHash": "PxZKFx8ACAt7gRnTSDgtZFA06cimls5XL1Olv63bWF8qKL5+EQdqq3K02etW4LNut4xDoREPe9z7QYATLMkBPA=="
+      },
       "System.Reflection.MetadataLoadContext": {
         "type": "Transitive",
         "resolved": "7.0.0",
@@ -705,6 +715,8 @@
           "Elastic.Clients.Elasticsearch": "[9.5.0, )",
           "Microsoft.AspNetCore.OpenApi": "[10.0.0, )",
           "Microsoft.EntityFrameworkCore": "[10.0.0, )",
+          "Microsoft.Extensions.AI": "[10.0.0, )",
+          "Microsoft.Extensions.Http.Resilience": "[10.0.0, )",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "[10.0.0, )",
           "TokenBurn.Common": "[1.0.0, )",
           "TokenBurn.Contracts": "[1.0.0, )"
@@ -844,6 +856,16 @@
         "contentHash": "A3MX1ee7RDxWCUdx/KqP+74fbksz0UIhkVZh56YHvbPkEKsffCXgHU3LGkRDwqR/MrBNWLCWC/IVX79tzM30ZA==",
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "10.0.0"
+        }
+      },
+      "Microsoft.Extensions.AI": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.0, )",
+        "resolved": "10.0.0",
+        "contentHash": "H5ObccxTedvOsjFsMFw0prEpNF/2qi6f9+p5aF9nGrlyWHRmKRdUK8HomPu/F8doRLZG6NmzJrN22CkX8Ac4FQ==",
+        "dependencies": {
+          "Microsoft.Extensions.AI.Abstractions": "10.0.0",
+          "System.Numerics.Tensors": "10.0.0"
         }
       },
       "Microsoft.Extensions.Http.Resilience": {

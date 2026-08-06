@@ -31,7 +31,10 @@ public static class SearchEndpoint
         try
         {
             string? cursor = parameters.Cursor;
-            if (cursor is not null && !CursorCodec.TryDecode(cursor, out _, out _))
+            bool cursorIsValid = cursor is null || (parameters.Mode == "hybrid"
+                ? HybridCursorCodec.TryParse(cursor, out _)
+                : CursorCodec.TryDecode(cursor, out _, out _));
+            if (!cursorIsValid)
                 throw new ValidationException("Invalid query parameters.", [new ValidationFailure("cursor", "cursor is invalid.")]);
 
             SearchQuery query = new(parameters.Q, parameters.Mode, parameters.Model, parameters.Persona, parameters.Source, parameters.Status, parameters.From, parameters.To, cursor, parameters.Limit ?? DefaultLimit);

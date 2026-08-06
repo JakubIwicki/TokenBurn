@@ -6,7 +6,7 @@ using TokenBurn.Common.Pagination;
 
 namespace Api.TokenBurn.Insights.Features.Search;
 
-public sealed class SearchHandler(ElasticsearchClient client) : IRequestHandler<SearchQuery, SearchResponse>
+public sealed class SearchHandler(ElasticsearchClient client, HybridTracesRetrievalService hybridRetrieval) : IRequestHandler<SearchQuery, SearchResponse>
 {
     private const string IndexName = "traces";
     private const string SearchableTextField = "searchable_text";
@@ -16,22 +16,14 @@ public sealed class SearchHandler(ElasticsearchClient client) : IRequestHandler<
 
     public async Task<SearchResponse> HandleAsync(SearchQuery request, CancellationToken cancellationToken)
     {
+        if (request.Mode == "hybrid")
+            return await hybridRetrieval.SearchAsync(request, cancellationToken);
+
         var must = new List<Query>
         {
             new MultiMatchQuery { Query = request.Q!, Fields = SearchableTextField }
         };
-        var filter = new List<Query>();
-        AddTermFilter(filter, "model_slug", request.Model);
-        AddTermFilter(filter, "persona", request.Persona);
-        AddTermFilter(filter, "source", request.Source);
-        AddTermFilter(filter, "status", request.Status);
-        if (request.From is not null || request.To is not null)
-        {
-            var range = new DateRangeQuery(SearchableRangeField);
-            if (request.From is not null) range.Gte = request.From.Value.UtcDateTime;
-            if (request.To is not null) range.Lte = request.To.Value.UtcDateTime;
-            filter.Add(range);
-        }
+        List<Query> filter = SearchFilterBuilder.BuildFilters(request);
 
         var requestModel = new SearchRequest(IndexName)
         {
@@ -125,11 +117,5 @@ public sealed class SearchHandler(ElasticsearchClient client) : IRequestHandler<
         };
     }
 
-    private const string SearchableRangeField = "started_at";
-
-    private static void AddTermFilter(ICollection<Query> filter, string field, string? value)
-    {
-        if (value is not null)
-            filter.Add(new TermQuery(field, value));
-    }
+    private const string SearchableRangeField = SearchFilterBuilder.StartedAtField;
 }
