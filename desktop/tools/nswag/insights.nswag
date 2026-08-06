@@ -1,0 +1,23 @@
+{
+  "runtime": "Net100",
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "../../openapi/insights.openapi.yaml",
+      "output": null
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "className": "InsightsApiClient",
+      "generateClientInterfaces": true,
+      "generateOptionalParameters": true,
+      "generateNullableReferenceTypes": true,
+      "dateTimeType": "System.DateTimeOffset",
+      "jsonLibrary": "SystemTextJson",
+      "output": "../../src/TokenBurn.Desktop.Core/Services/Generated/InsightsApiClient.g.cs",
+      "operationGenerationMode": "SingleClientFromOperationId",
+      "namespace": "TokenBurn.Desktop.Core.Services.Generated",
+      "excludedOperationNames": ["OpenApiDocument"]
+    }
+  }
+}

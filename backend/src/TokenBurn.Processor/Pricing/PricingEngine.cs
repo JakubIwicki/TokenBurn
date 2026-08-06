@@ -50,6 +50,38 @@ public sealed class PricingEngine(TelemetryDbContext db)
         return run.TryMarkPriced(cost, multiplier);
     }
 
+    /// <summary>
+    ///     Prices a run's retained messages against the run's OWN price row and peak
+    ///     multiplier — resolved once from the run's timestamps, never per-message, so the
+    ///     per-message costs sum exactly to the run cost even across a peak boundary
+    ///     (CostCalculator.Compute is linear). An unpriced run (no ended_at, no resolvable
+    ///     price row) leaves every message cost null and returns Success. A non-success
+    ///     result means a message was already priced — a defect the caller should surface.
+    /// </summary>
+    public async Task<Result> PriceMessagesAsync(
+        AgentRun run, IReadOnlyList<AgentMessage> messages, CancellationToken cancellationToken)
+    {
+        if (messages.Count == 0 || run.EndedAt is null || HasNoUsage(run))
+            return Result.Success();
+
+        DateTimeOffset asOf = run.StartedAt ?? run.EndedAt!.Value;
+        Result<PriceRow> resolved = await ResolveAsync(run.ModelSlug, run.Service, asOf, cancellationToken);
+        if (!resolved.IsSuccess)
+            return Result.Success();
+
+        decimal multiplier = PriceMultiplier.For(asOf);
+        foreach (AgentMessage message in messages)
+        {
+            decimal cost = CostCalculator.Compute(
+                message.InputTokens, message.CacheReadTokens, message.CacheWriteTokens,
+                message.OutputTokens, resolved.Value!, multiplier);
+            Result attached = message.AttachCost(cost);
+            if (!attached.IsSuccess)
+                return attached;
+        }
+        return Result.Success();
+    }
+
     private static bool HasNoUsage(AgentRun run)
         => run.InputTokens is null or 0
             && run.CacheReadTokens is null or 0

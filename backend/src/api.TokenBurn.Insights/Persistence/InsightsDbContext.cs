@@ -11,10 +11,12 @@ namespace Api.TokenBurn.Insights.Persistence;
 public sealed class InsightsDbContext(DbContextOptions<InsightsDbContext> options) : DbContext(options)
 {
     public DbSet<AgentRunReadModel> AgentRuns => Set<AgentRunReadModel>();
+    public DbSet<WasteFindingReadModel> WasteFindings => Set<WasteFindingReadModel>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("telemetry");
         modelBuilder.ApplyConfiguration(new AgentRunReadConfiguration());
+        modelBuilder.ApplyConfiguration(new WasteFindingReadConfiguration());
     }
 }

@@ -93,7 +93,7 @@ public sealed class SearchEndpointTests : IAsyncLifetime
         using HttpResponseMessage response = await ActAsync("?q=acme&from=2026-13-99");
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        await AssertErrorsAsync(response);
+        await AssertFrameworkBindingErrorAsync(response);
     }
 
     [Fact]
@@ -328,5 +328,11 @@ public sealed class SearchEndpointTests : IAsyncLifetime
     {
         using JsonDocument body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         body.RootElement.GetProperty("errors").GetArrayLength().Should().BeGreaterThan(0);
+    }
+
+    private static async Task AssertFrameworkBindingErrorAsync(HttpResponseMessage response)
+    {
+        using JsonDocument body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        body.RootElement.GetProperty("detail").GetString().Should().Contain("Failed to bind parameter");
     }
 }

@@ -1,0 +1,142 @@
+<UserControl x:Class="TokenBurn.Desktop.Features.Findings.FindingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="findings" Style="{StaticResource ViewTitleTextStyle}" />
+
+        <!-- Filters -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,10">
+            <TextBox Width="140" Style="{StaticResource TerminalTextBoxStyle}"
+                     Text="{Binding KindFilter, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text=" kind" Style="{StaticResource DimLabelTextStyle}" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <TextBox Width="110" Style="{StaticResource TerminalTextBoxStyle}"
+                     Text="{Binding SeverityFilter, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text=" severity" Style="{StaticResource DimLabelTextStyle}" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <Button Content="refresh" Command="{Binding RefreshCommand}" Style="{StaticResource TerminalButtonStyle}" />
+        </StackPanel>
+
+        <!-- Findings table (read-only) -->
+        <Grid Grid.Row="2">
+            <ListView ItemsSource="{Binding Findings}"
+                      ItemContainerStyle="{StaticResource TerminalListItemStyle}"
+                      Background="Transparent" BorderThickness="0">
+                <ListView.View>
+                    <GridView ColumnHeaderContainerStyle="{StaticResource TerminalColumnHeaderStyle}">
+                        <GridViewColumn Header="severity" Width="110">
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="severity" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Style="{StaticResource SeverityDotStyle}" Margin="8,0,6,0" />
+                                        <TextBlock Text="{Binding Severity}" Style="{StaticResource CellTextStyle}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="kind" Width="170">
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="kind" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Kind}" Style="{StaticResource CellTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="wasted cost" Width="120">
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="wasted cost" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" />
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding WastedCost}" Style="{StaticResource CellTextStyle}"
+                                               Foreground="{StaticResource SpendBrush}" FontWeight="{StaticResource FontWeightSemibold}"
+                                               HorizontalAlignment="Right" Margin="0,0,8,0" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="coverage" Width="90">
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="coverage" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="n/a" Style="{StaticResource CoverageStatusTextStyle}" Margin="8,0,0,0" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="detected" Width="150">
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="detected" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DetectedAt}" Style="{StaticResource CellTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="ack" Width="150">
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="ack" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding AcknowledgedAt}" Style="{StaticResource CellTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+
+            <TextBlock Text="no findings"
+                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource EmptyStateTextStyle}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Findings.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+            <Border Background="{StaticResource OverlayBrush}" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="loading…" Foreground="{StaticResource TextSecondaryBrush}"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+        </Grid>
+
+        <!-- Paging -->
+        <Button Grid.Row="3" Content="load more" Margin="0,8,0,0" HorizontalAlignment="Left"
+                Command="{Binding LoadMoreCommand}" Style="{StaticResource TerminalButtonStyle}" />
+
+        <TextBlock Grid.Row="4" Text="{Binding ErrorMessage}" Style="{StaticResource ErrorTextStyle}"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVis}}" />
+    </Grid>
+</UserControl>

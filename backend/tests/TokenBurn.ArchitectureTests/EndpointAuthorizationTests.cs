@@ -167,7 +167,8 @@ public sealed class EndpointAuthorizationTests
         // Bump this const deliberately when an endpoint is added — a silently
         // shrinking count is the exact failure mode that lets an endpoint
         // escape the authorization scan.
-        const int expectedScannedPairCount = 5;
+        // 7 -> 8 is deliberate: /api/costs/summary was added in Phase 7 Part A2.
+        const int expectedScannedPairCount = 8;
         result.ScannedCount.Should().Be(expectedScannedPairCount,
             $"the authorization convention must scan exactly {expectedScannedPairCount} method+pattern pairs " +
             $"(one per mapped endpoint); a count drop means endpoints escaped the scan");

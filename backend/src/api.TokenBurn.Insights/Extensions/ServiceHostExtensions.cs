@@ -1,3 +1,5 @@
+using Api.TokenBurn.Insights.Features.Costs;
+using Api.TokenBurn.Insights.Features.Findings;
 using Api.TokenBurn.Insights.Features.Runs;
 using Api.TokenBurn.Insights.Features.Search;
 using Api.TokenBurn.Insights.Persistence;
@@ -22,6 +24,7 @@ public static class ServiceHostExtensions
         builder.AddTokenBurnJwtAuth();
         builder.Services.AddTokenBurnMediatR(typeof(Program).Assembly);
         builder.Services.AddProblemDetails();
+        builder.Services.AddOpenApi();
         builder.Services.AddDbContext<InsightsDbContext>(options =>
             options.UseNpgsql(connectionString, npgsql => npgsql.MigrationsAssembly(typeof(InsightsDbContext).Assembly.FullName)
                 .MigrationsHistoryTable("__EFMigrationsHistory", "telemetry")));
@@ -56,6 +59,9 @@ public static class ServiceHostExtensions
         app.MapHealthChecks("/health/ready");
         app.MapSearchEndpoints();
         app.MapRunsEndpoints();
+        app.MapFindingsEndpoints();
+        app.MapCostSummaryEndpoints();
+        app.MapOpenApi().WithName("OpenApiDocument").RequireAuthorization(AuthorizationPolicies.InsightsRead).RequireRateLimiting("v1");
         return app;
     }
 

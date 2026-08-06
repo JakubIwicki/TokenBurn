@@ -1,3 +1,4 @@
+using Api.TokenBurn.Insights.Features.Findings;
 using Api.TokenBurn.Insights.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -85,6 +86,16 @@ public sealed class RunDetailHandler(InsightsDbContext db) : IRequestHandler<Run
         if (run is null)
             return null;
 
-        return new RunDetailResponse { Run = RunsHandler.ToSummary(run) };
+        List<WasteFindingReadModel> findings = await db.WasteFindings.AsNoTracking()
+            .Where(finding => finding.RunId == request.Id)
+            .OrderByDescending(finding => finding.DetectedAt)
+            .ThenByDescending(finding => finding.Id)
+            .ToListAsync(cancellationToken);
+
+        return new RunDetailResponse
+        {
+            Run = RunsHandler.ToSummary(run),
+            Findings = findings.Select(FindingsHandler.ToSummary).ToList()
+        };
     }
 }

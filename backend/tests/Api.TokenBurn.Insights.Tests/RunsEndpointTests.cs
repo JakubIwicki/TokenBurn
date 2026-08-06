@@ -95,7 +95,7 @@ public sealed class RunsEndpointTests : IAsyncLifetime
         using HttpResponseMessage response = await client.GetAsync("/api/runs?from=2026-13-99");
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        await AssertErrorsAsync(response);
+        await AssertFrameworkBindingErrorAsync(response);
     }
 
     [Fact]
@@ -184,6 +184,36 @@ public sealed class RunsEndpointTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ReturnsRunDetail_WithFindings_WhenRunHasFindings()
+    {
+        AgentRun run = CreateRun("sess-detail-findings", "deepseek-v4-flash", "researcher", BaseTime.AddHours(1), costUsd: 1.5m);
+        WasteFinding replay = WasteFinding.Create(run.Id, WasteFindingKind.ContextReplay, WasteFindingSeverity.Critical, new { a = 1 }, 0.4m, BaseTime.AddHours(1));
+        WasteFinding loop = WasteFinding.Create(run.Id, WasteFindingKind.Loop, WasteFindingSeverity.Major, new { a = 2 }, 0.1m, BaseTime.AddHours(2));
+        HttpClient client = await CreateSutAsync([replay, loop], run);
+
+        using HttpResponseMessage response = await client.GetAsync($"/api/runs/{run.Id}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        using JsonDocument body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        body.RootElement.GetProperty("run").GetProperty("id").GetGuid().Should().Be(run.Id);
+        IReadOnlyList<JsonElement> summary = body.RootElement.GetProperty("findings").EnumerateArray().ToList();
+        summary.Should().HaveCount(2);
+        summary.Select(finding => finding.GetProperty("kind").GetString())
+            .Should().BeEquivalentTo(WasteFindingKind.ContextReplay.ToString(), WasteFindingKind.Loop.ToString());
+        foreach (JsonElement finding in summary)
+        {
+            finding.GetProperty("id").GetGuid().Should().NotBeEmpty();
+            finding.GetProperty("runId").GetGuid().Should().Be(run.Id);
+            finding.GetProperty("severity").GetString().Should().NotBeNullOrWhiteSpace();
+            finding.GetProperty("wastedCostUsd").TryGetDecimal(out _).Should().BeTrue();
+            finding.GetProperty("detectedAt").TryGetDateTimeOffset(out _).Should().BeTrue();
+            finding.GetProperty("acknowledgedAt").ValueKind.Should().Be(JsonValueKind.Null);
+            finding.TryGetProperty("evidence", out _).Should().BeFalse();
+        }
+        body.RootElement.GetProperty("messages").GetArrayLength().Should().Be(0);
+    }
+
+    [Fact]
     public async Task ReturnsNotFound_WhenRunDoesNotExist()
     {
         HttpClient client = await CreateSutAsync();
@@ -206,6 +236,9 @@ public sealed class RunsEndpointTests : IAsyncLifetime
     }
 
     private async Task<HttpClient> CreateSutAsync(params AgentRun[] runs)
+        => await CreateSutAsync([], runs);
+
+    private async Task<HttpClient> CreateSutAsync(WasteFinding[] findings, params AgentRun[] runs)
     {
         string connectionString = await SharedPostgres.CloneAsync(_template);
         _cloneDatabases.Add(new NpgsqlConnectionStringBuilder(connectionString).Database!);
@@ -216,6 +249,8 @@ public sealed class RunsEndpointTests : IAsyncLifetime
             var testDb = new TestDb(db);
             foreach (AgentRun run in runs)
                 testDb.Store(run);
+            if (findings.Length > 0)
+                await new FindingsUpserter(db).UpsertAsync(findings, CancellationToken.None);
         }
 
         WebApplicationFactory<InsightsDbContext> factory = InsightsTestHost.Create(connectionString);
@@ -257,5 +292,11 @@ public sealed class RunsEndpointTests : IAsyncLifetime
     {
         using JsonDocument body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         body.RootElement.GetProperty("errors").GetArrayLength().Should().BeGreaterThan(0);
+    }
+
+    private static async Task AssertFrameworkBindingErrorAsync(HttpResponseMessage response)
+    {
+        using JsonDocument body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        body.RootElement.GetProperty("detail").GetString().Should().Contain("Failed to bind parameter");
     }
 }

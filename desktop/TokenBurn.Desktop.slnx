@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TokenBurn.Desktop.Core/TokenBurn.Desktop.Core.csproj" />
+    <Project Path="src/TokenBurn.Desktop/TokenBurn.Desktop.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TokenBurn.Desktop.Tests/TokenBurn.Desktop.Tests.csproj" />
+  </Folder>
+</Solution>

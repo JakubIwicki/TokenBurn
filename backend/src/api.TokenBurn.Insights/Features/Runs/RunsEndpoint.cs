@@ -15,22 +15,30 @@ public static class RunsEndpoint
     public static IEndpointRouteBuilder MapRunsEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/api/runs", HandleListAsync)
+            .WithName("Runs")
             .RequireAuthorization(AuthorizationPolicies.InsightsRead)
-            .RequireRateLimiting("v1");
+            .RequireRateLimiting("v1")
+            .Produces<RunsResponse>(StatusCodes.Status200OK);
         app.MapGet("/api/runs/{id:guid}", HandleDetailAsync)
+            .WithName("RunsDetail")
             .RequireAuthorization(AuthorizationPolicies.InsightsRead)
-            .RequireRateLimiting("v1");
+            .RequireRateLimiting("v1")
+            .Produces<RunDetailResponse>(StatusCodes.Status200OK);
         return app;
     }
 
     private static async Task<IResult> HandleListAsync(
-        HttpContext context,
+        [AsParameters] RunsQueryParameters parameters,
         IMediator mediator,
         CancellationToken cancellationToken)
     {
         try
         {
-            RunsQuery query = Bind(context.Request.Query);
+            string? cursor = parameters.Cursor;
+            if (cursor is not null && !CursorCodec.TryDecode(cursor, out _, out _))
+                throw new ValidationException("Invalid query parameters.", [new ValidationFailure("cursor", "cursor is invalid.")]);
+
+            RunsQuery query = new(parameters.From, parameters.To, parameters.Model, parameters.Persona, parameters.MinCost, cursor, parameters.Limit ?? DefaultLimit);
             RunsResponse response = await mediator.Send(query, cancellationToken);
             return Results.Ok(response);
         }
@@ -48,39 +56,4 @@ public static class RunsEndpoint
         RunDetailResponse? response = await mediator.Send(new RunDetailQuery(id), cancellationToken);
         return response is null ? Results.NotFound() : Results.Ok(response);
     }
-
-    private static RunsQuery Bind(IQueryCollection query)
-    {
-        int limit = ParseInt(query["limit"].FirstOrDefault(), DefaultLimit);
-        DateTimeOffset? from = ParseDateTimeOffset(query["from"].FirstOrDefault(), "from");
-        DateTimeOffset? to = ParseDateTimeOffset(query["to"].FirstOrDefault(), "to");
-        decimal? minCost = ParseDecimal(query["minCost"].FirstOrDefault());
-        string? cursor = query["cursor"].FirstOrDefault();
-        if (cursor is not null && !CursorCodec.TryDecode(cursor, out _, out _))
-            throw new ValidationException("Invalid query parameters.", [new ValidationFailure("cursor", "cursor is invalid.")]);
-
-        return new RunsQuery(
-            from,
-            to,
-            query["model"].FirstOrDefault(),
-            query["persona"].FirstOrDefault(),
-            minCost,
-            cursor,
-            limit);
-    }
-
-    private static int ParseInt(string? value, int fallback)
-        => int.TryParse(value, out int parsed) ? parsed : fallback;
-
-    private static DateTimeOffset? ParseDateTimeOffset(string? value, string paramName)
-    {
-        if (value is null)
-            return null;
-        if (!DateTimeOffset.TryParse(value, out DateTimeOffset parsed))
-            throw new ValidationException("Invalid query parameters.", [new ValidationFailure(paramName, $"{paramName} is invalid.")]);
-        return parsed;
-    }
-
-    private static decimal? ParseDecimal(string? value)
-        => decimal.TryParse(value, out decimal parsed) ? parsed : null;
 }

@@ -28,4 +28,7 @@ public sealed record NormalizedRun
     public long CacheWriteTokens { get; init; }
     public long OutputTokens { get; init; }
     public decimal? ReportedCostUsd { get; init; }
+
+    /// <summary>Retained per-message rows; empty for sources that do not carry them.</summary>
+    public IReadOnlyList<NormalizedMessage> Messages { get; init; } = [];
 }

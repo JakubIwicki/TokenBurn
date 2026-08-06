@@ -6,6 +6,7 @@ using TokenBurn.Processor.Adapters;
 using TokenBurn.Processor.Domain;
 using TokenBurn.Processor.Persistence;
 using TokenBurn.Processor.Pricing;
+using PricingStatus = TokenBurn.Processor.Domain.PricingStatus;
 
 namespace TokenBurn.Processor.Commands;
 
@@ -19,6 +20,7 @@ public sealed class ClaudeCodeTranscriptImportExecutor(
     ClaudeCodeTranscriptAdapter adapter,
     PricingEngine pricingEngine,
     AgentRunUpserter upserter,
+    AgentMessageUpserter messageUpserter,
     TimeProvider timeProvider,
     ILogger<ClaudeCodeTranscriptImportExecutor> logger) : IImportCommandExecutor
 {
@@ -58,7 +60,21 @@ public sealed class ClaudeCodeTranscriptImportExecutor(
                 {
                     AgentRun run = AgentRunEnvelopeMapper.ToAgentRun(envelope);
                     await pricingEngine.PriceRunAsync(run, ct);
-                    await upserter.UpsertAsync(run, ct);
+                    (Guid storedId, bool applied) = await upserter.UpsertAsync(run, ct);
+                    // Applied is false when the ended_at guard rejected the replay: the stored
+                    // run kept its original pricing, so re-pricing messages would break
+                    // SUM(messages.cost) = run.cost. Keep the stored run's messages untouched.
+                    if (applied && run.PricingStatus == PricingStatus.Priced && envelope.Messages.Count > 0)
+                    {
+                        AgentMessage[] messages = envelope.Messages
+                            .Select(message => AgentMessageEnvelopeMapper.ToAgentMessage(storedId, message))
+                            .ToArray();
+                        var messagePricing = await pricingEngine.PriceMessagesAsync(run, messages, ct);
+                        if (!messagePricing.IsSuccess)
+                            logger.LogWarning("Pricing messages for run {RunId} failed: {Error}", storedId, messagePricing.ErrorMessage);
+                        else
+                            await messageUpserter.UpsertAsync(storedId, messages, ct);
+                    }
                     runsUpserted++;
                 }
             }

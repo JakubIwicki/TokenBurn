@@ -1,3 +1,5 @@
+using Api.TokenBurn.Insights.Features.Findings;
+
 namespace Api.TokenBurn.Insights.Features.Runs;
 
 public sealed class RunsResponse
@@ -28,8 +30,8 @@ public sealed class RunSummary
 public sealed class RunDetailResponse
 {
     public RunSummary Run { get; init; } = null!;
-    // Tables absent in Phase 3/4 — empty lists keep the contract stable
-    // across phases without a breaking change.
+    // Messages table absent in Phase 4 — empty list keeps the contract stable
+    // across phases without a breaking change (deferred by design).
     public IReadOnlyList<object> Messages { get; init; } = [];
-    public IReadOnlyList<object> Findings { get; init; } = [];
+    public IReadOnlyList<FindingSummary> Findings { get; init; } = [];
 }

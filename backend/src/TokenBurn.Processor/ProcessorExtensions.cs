@@ -11,10 +11,12 @@ using TokenBurn.Processor.Adapters;
 using TokenBurn.Processor.Commands;
 using TokenBurn.Processor.Domain;
 using TokenBurn.Processor.Features.Imports;
+using PricingStatus = TokenBurn.Processor.Domain.PricingStatus;
 using TokenBurn.Processor.Infrastructure;
 using TokenBurn.Processor.Infrastructure.Indexing;
 using TokenBurn.Processor.Persistence;
 using TokenBurn.Processor.Pricing;
+using TokenBurn.Processor.WasteDetection;
 
 namespace TokenBurn.Processor;
 
@@ -39,6 +41,10 @@ public static class ProcessorExtensions
         builder.Services.AddScoped<PricingSeeder>();
         builder.Services.AddScoped<PricingEngine>();
         builder.Services.AddScoped<AgentRunUpserter>();
+        builder.Services.AddScoped<AgentMessageUpserter>();
+        builder.Services.AddScoped<FindingsUpserter>();
+        builder.Services.AddSingleton(WasteDetectionOptions.FromConfiguration(builder.Configuration));
+        builder.Services.AddScoped<WasteDetectionService>();
         builder.Services.AddScoped<IImportCommandExecutor, ClaudeCodeTranscriptImportExecutor>();
         builder.Services.AddSingleton<KafkaTopicInitializer>();
         builder.Services.AddProcessorElasticsearchClient(builder.Configuration);
@@ -50,6 +56,7 @@ public static class ProcessorExtensions
         builder.Services.AddHostedService<RunReplayTrigger>();
         builder.Services.AddHostedService<TelemetryRawConsumer>();
         builder.Services.AddHostedService<PricedRunIndexConsumer>();
+        builder.Services.AddHostedService<WasteDetectionConsumer>();
         builder.Services.AddHostedService<ImportCommandWorker>();
         return builder;
     }
@@ -110,17 +117,32 @@ internal sealed class TelemetryRawConsumer(
                     SourceDispatcher dispatcher = scope.ServiceProvider.GetRequiredService<SourceDispatcher>();
                     PricingEngine engine = scope.ServiceProvider.GetRequiredService<PricingEngine>();
                     AgentRunUpserter upserter = scope.ServiceProvider.GetRequiredService<AgentRunUpserter>();
+                    AgentMessageUpserter messageUpserter = scope.ServiceProvider.GetRequiredService<AgentMessageUpserter>();
                     foreach (NormalizedRun envelope in dispatcher.Map(result.Message.Value))
                     {
                         AgentRun run = AgentRunEnvelopeMapper.ToAgentRun(envelope);
                         Result pricing = await engine.PriceRunAsync(run, stoppingToken);
                         if (!pricing.IsSuccess)
                             logger.LogWarning("Pricing run {RunId} failed: {Error}", run.Id, pricing.ErrorMessage);
-                        await upserter.UpsertAsync(run, stoppingToken);
+                        (Guid storedId, bool applied) = await upserter.UpsertAsync(run, stoppingToken);
+                        // Applied is false when the ended_at guard rejected the replay: the stored
+                        // run kept its original pricing, so re-pricing messages would break
+                        // SUM(messages.cost) = run.cost. Keep the stored run's messages untouched.
+                        if (applied && run.PricingStatus == PricingStatus.Priced && envelope.Messages.Count > 0)
+                        {
+                            AgentMessage[] messages = envelope.Messages
+                                .Select(message => AgentMessageEnvelopeMapper.ToAgentMessage(storedId, message))
+                                .ToArray();
+                            var messagePricing = await engine.PriceMessagesAsync(run, messages, stoppingToken);
+                            if (!messagePricing.IsSuccess)
+                                logger.LogWarning("Pricing messages for run {RunId} failed: {Error}", storedId, messagePricing.ErrorMessage);
+                            else
+                                await messageUpserter.UpsertAsync(storedId, messages, stoppingToken);
+                        }
                         // Crash-safe order: upsert -> publish -> commit. A crash between publish
                         // and commit re-publishes the PricedRun; the index layer collapses the
                         // duplicate (_id = runId overwrite), so the run doc count stays distinct.
-                        Contracts.PricedRun priced = PricedRunMapper.ToPricedRun(run);
+                        Contracts.PricedRun priced = PricedRunMapper.ToPricedRun(run) with { Id = storedId };
                         await producer.ProduceAsync(KafkaTopics.Priced, new Message<string, string>
                         {
                             Key = priced.SessionId,
@@ -141,6 +163,67 @@ internal sealed class TelemetryRawConsumer(
                     // reprocessing safe. 'result' is null when Consume itself failed, so the
                     // offset is best-effort and must never be dereferenced unconditionally.
                     logger.LogError(exception, "Failed to process telemetry.raw message at {TopicPartitionOffset}.", result?.TopicPartitionOffset);
+                    throw;
+                }
+            }
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { }
+        finally
+        {
+            consumer.Close();
+        }
+    }
+}
+
+/// <summary>
+///     Consumes <c>telemetry.priced</c>, runs waste detection for each priced run and persists
+///     the findings — publish-and-forget, no downstream topic. A crash between persist and
+///     commit re-delivers the PricedRun; the ON CONFLICT (run_id, kind, evidence_hash) dedupe
+///     makes the re-detect idempotent, so a replay cannot double-count a finding.
+/// </summary>
+internal sealed class WasteDetectionConsumer(
+    IServiceScopeFactory scopeFactory,
+    IConfiguration configuration,
+    ILogger<WasteDetectionConsumer> logger) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        string bootstrapServers = configuration["Kafka:BootstrapServers"]
+            ?? throw new InvalidOperationException("Kafka:BootstrapServers must be configured.");
+        ConsumerConfig consumerConfig = new()
+        {
+            BootstrapServers = bootstrapServers,
+            GroupId = "processor-telemetry-waste",
+            AutoOffsetReset = AutoOffsetReset.Earliest,
+            EnableAutoCommit = false
+        };
+        using IConsumer<string, string> consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
+        consumer.Subscribe(KafkaTopics.Priced);
+        try
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                ConsumeResult<string, string> result = null!;
+                try
+                {
+                    result = consumer.Consume(stoppingToken);
+                    using IServiceScope scope = scopeFactory.CreateScope();
+                    WasteDetectionService service = scope.ServiceProvider.GetRequiredService<WasteDetectionService>();
+                    PricedRun priced = KafkaJsonSerializer.Deserialize<PricedRun>(result.Message.Value)
+                        ?? throw new InvalidOperationException("PricedRun payload deserialized to null.");
+                    await service.DetectRunAsync(priced.Id, stoppingToken);
+                    consumer.Commit(result);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                catch (Exception exception)
+                {
+                    // Same crash-on-error posture as the other consumers: never commit past an
+                    // un-processed offset, because the only recovery would be a full replay. The
+                    // idempotent findings upsert makes reprocessing safe.
+                    logger.LogError(exception, "Failed to detect waste for telemetry.priced message at {TopicPartitionOffset}.", result?.TopicPartitionOffset);
                     throw;
                 }
             }

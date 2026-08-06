@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+    <PackageReference Include="NSwag.MSBuild" PrivateAssets="all" GeneratePathProperty="true" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../TokenBurn.Desktop.Core/TokenBurn.Desktop.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!--
+    Authoring-time only: regenerates TokenBurn.Desktop.Core/Services/Generated/InsightsApiClient.g.cs
+    from desktop/tools/nswag/insights.nswag. Deliberately NOT hooked to any BeforeTargets/AfterTargets —
+    CI never runs it.
+
+    NSwag.MSBuild 14.7.1 is props-only (build/NSwag.MSBuild.props) and sets each NSwagExe* property to a
+    FULL command, not a bare path: NSwagExe_Net100/Net90/Net80 are `dotnet "<pkg>/tools/NetXX/dotnet-nswag.dll"`
+    and NSwagExe is the quoted native tools/Win/NSwag.exe. Precedence: Net100 first (targets net10.0 — the
+    Net80 console fails on a net10-only machine, default roll-forward is Minor), then Net80 (needs a net8
+    runtime), then the native Win exe (Windows only), then a locally installed NSwag.ConsoleCore tool.
+  -->
+  <Target Name="RegenerateInsightsClient">
+    <PropertyGroup>
+      <NSwagConfigPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../../tools/nswag/insights.nswag'))</NSwagConfigPath>
+      <NSwagToolManifest>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../.config/dotnet-tools.json'))</NSwagToolManifest>
+    </PropertyGroup>
+    <Message Importance="high" Text="Regenerating Insights client from $(NSwagConfigPath)" />
+    <Exec
+      Condition="'$(NSwagExe_Net100)' != ''"
+      Command="$(NSwagExe_Net100) run &quot;$(NSwagConfigPath)&quot;" />
+    <Exec
+      Condition="'$(NSwagExe_Net100)' == '' and '$(NSwagExe_Net80)' != ''"
+      Command="$(NSwagExe_Net80) run &quot;$(NSwagConfigPath)&quot;" />
+    <Exec
+      Condition="'$(NSwagExe_Net100)' == '' and '$(NSwagExe_Net80)' == '' and '$(NSwagExe)' != ''"
+      Command="$(NSwagExe) run &quot;$(NSwagConfigPath)&quot;" />
+    <Exec
+      Condition="'$(NSwagExe_Net100)' == '' and '$(NSwagExe_Net80)' == '' and '$(NSwagExe)' == '' and Exists('$(NSwagToolManifest)')"
+      Command="dotnet tool run nswag run &quot;$(NSwagConfigPath)&quot;" />
+    <Error
+      Condition="'$(NSwagExe_Net100)' == '' and '$(NSwagExe_Net80)' == '' and '$(NSwagExe)' == '' and !Exists('$(NSwagToolManifest)')"
+      Text="RegenerateInsightsClient: no NSwag executable resolved. Restore this project so NSwag.MSBuild provides NSwagExe_Net100/Net80, or set NSwagExe, or install the NSwag.ConsoleCore dotnet tool." />
+  </Target>
+</Project>

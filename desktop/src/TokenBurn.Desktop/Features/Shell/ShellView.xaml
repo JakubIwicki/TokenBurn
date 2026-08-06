@@ -1,0 +1,158 @@
+<UserControl x:Class="TokenBurn.Desktop.Features.Shell.ShellView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="clr-namespace:TokenBurn.Desktop.Features.Dashboard"
+             xmlns:viewsRuns="clr-namespace:TokenBurn.Desktop.Features.Runs"
+             xmlns:viewsRd="clr-namespace:TokenBurn.Desktop.Features.RunDetail"
+             xmlns:viewsSearch="clr-namespace:TokenBurn.Desktop.Features.Search"
+             xmlns:viewsFindings="clr-namespace:TokenBurn.Desktop.Features.Findings"
+             xmlns:dashVm="clr-namespace:TokenBurn.Desktop.Core.Features.Dashboard;assembly=TokenBurn.Desktop.Core"
+             xmlns:runsVm="clr-namespace:TokenBurn.Desktop.Core.Features.Runs;assembly=TokenBurn.Desktop.Core"
+             xmlns:rdVm="clr-namespace:TokenBurn.Desktop.Core.Features.RunDetail;assembly=TokenBurn.Desktop.Core"
+             xmlns:searchVm="clr-namespace:TokenBurn.Desktop.Core.Features.Search;assembly=TokenBurn.Desktop.Core"
+             xmlns:findVm="clr-namespace:TokenBurn.Desktop.Core.Features.Findings;assembly=TokenBurn.Desktop.Core">
+
+    <UserControl.Resources>
+        <Style x:Key="DashboardNavStyle" TargetType="Button" BasedOn="{StaticResource NavItemStyle}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ActiveFeature}" Value="Dashboard">
+                    <Setter Property="Background" Value="{StaticResource SelectionBrush}" />
+                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="RunsNavStyle" TargetType="Button" BasedOn="{StaticResource NavItemStyle}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ActiveFeature}" Value="Runs">
+                    <Setter Property="Background" Value="{StaticResource SelectionBrush}" />
+                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="SearchNavStyle" TargetType="Button" BasedOn="{StaticResource NavItemStyle}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ActiveFeature}" Value="Search">
+                    <Setter Property="Background" Value="{StaticResource SelectionBrush}" />
+                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="FindingsNavStyle" TargetType="Button" BasedOn="{StaticResource NavItemStyle}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ActiveFeature}" Value="Findings">
+                    <Setter Property="Background" Value="{StaticResource SelectionBrush}" />
+                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Left nav rail: features as CLI rows, ▸ on active, SelectionBrush -->
+        <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,0,1,0"
+                Padding="8">
+            <StackPanel>
+                <Button Command="{Binding ShowDashboardCommand}" Style="{StaticResource DashboardNavStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="▸" FontSize="{StaticResource FontSizeData}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ActiveFeature}" Value="Dashboard">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Text="Dashboard" Margin="8,0,0,0" />
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding ShowRunsCommand}" Style="{StaticResource RunsNavStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="▸" FontSize="{StaticResource FontSizeData}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ActiveFeature}" Value="Runs">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Text="Runs" Margin="8,0,0,0" />
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding ShowSearchCommand}" Style="{StaticResource SearchNavStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="▸" FontSize="{StaticResource FontSizeData}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ActiveFeature}" Value="Search">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Text="Search" Margin="8,0,0,0" />
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding ShowFindingsCommand}" Style="{StaticResource FindingsNavStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="▸" FontSize="{StaticResource FontSizeData}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ActiveFeature}" Value="Findings">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Text="Findings" Margin="8,0,0,0" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- Active feature host: DataTemplate switching on the Shell's ActiveView (no nav framework) -->
+        <Border Grid.Column="1" Background="{StaticResource ChromeBrush}">
+            <ContentControl Content="{Binding ActiveView}">
+                <ContentControl.Resources>
+                    <DataTemplate DataType="{x:Type dashVm:DashboardViewModel}">
+                        <views:DashboardView />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type runsVm:RunsViewModel}">
+                        <viewsRuns:RunsView />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type rdVm:RunDetailViewModel}">
+                        <viewsRd:RunDetailView />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type searchVm:SearchViewModel}">
+                        <viewsSearch:SearchView />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type findVm:FindingsViewModel}">
+                        <viewsFindings:FindingsView />
+                    </DataTemplate>
+                </ContentControl.Resources>
+            </ContentControl>
+        </Border>
+    </Grid>
+</UserControl>

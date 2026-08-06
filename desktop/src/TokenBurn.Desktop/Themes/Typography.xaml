@@ -1,0 +1,20 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- One family, monospace, for the whole console (blueprint §Type). Hierarchy via ramp + weight. -->
+    <FontFamily x:Key="TerminalFont">JetBrains Mono, Cascadia Mono, Consolas</FontFamily>
+
+    <!-- Size ramp: 11 data/dim · 12 body · 14 feature title · 16 view title · 20 hero burn -->
+    <sys:Double x:Key="FontSizeData">11</sys:Double>
+    <sys:Double x:Key="FontSizeBody">12</sys:Double>
+    <sys:Double x:Key="FontSizeFeatureTitle">14</sys:Double>
+    <sys:Double x:Key="FontSizeViewTitle">16</sys:Double>
+    <sys:Double x:Key="FontSizeHeroBurn">20</sys:Double>
+
+    <!-- Weight ramp -->
+    <FontWeight x:Key="FontWeightRegular">400</FontWeight>
+    <FontWeight x:Key="FontWeightSemibold">600</FontWeight>
+    <FontWeight x:Key="FontWeightBold">800</FontWeight>
+
+</ResourceDictionary>

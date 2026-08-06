@@ -7,6 +7,8 @@ namespace TokenBurn.Processor.Persistence;
 public sealed class TelemetryDbContext(DbContextOptions<TelemetryDbContext> options) : DbContext(options)
 {
     public DbSet<AgentRun> AgentRuns => Set<AgentRun>();
+    public DbSet<AgentMessage> AgentMessages => Set<AgentMessage>();
+    public DbSet<WasteFinding> WasteFindings => Set<WasteFinding>();
     public DbSet<ModelPrice> ModelPrices => Set<ModelPrice>();
     public DbSet<ModelAlias> ModelAliases => Set<ModelAlias>();
     public DbSet<ImportCommand> ImportCommands => Set<ImportCommand>();
@@ -15,6 +17,8 @@ public sealed class TelemetryDbContext(DbContextOptions<TelemetryDbContext> opti
     {
         modelBuilder.HasDefaultSchema("telemetry");
         modelBuilder.ApplyConfiguration(new AgentRunConfiguration());
+        modelBuilder.ApplyConfiguration(new AgentMessageConfiguration());
+        modelBuilder.ApplyConfiguration(new WasteFindingConfiguration());
         modelBuilder.ApplyConfiguration(new ModelPriceConfiguration());
         modelBuilder.ApplyConfiguration(new ModelAliasConfiguration());
         modelBuilder.ApplyConfiguration(new ImportCommandConfiguration());

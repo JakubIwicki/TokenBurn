@@ -16,19 +16,25 @@ public static class SearchEndpoint
     public static IEndpointRouteBuilder MapSearchEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/api/search", HandleAsync)
+            .WithName("Search")
             .RequireAuthorization(AuthorizationPolicies.InsightsRead)
-            .RequireRateLimiting("v1");
+            .RequireRateLimiting("v1")
+            .Produces<SearchResponse>(StatusCodes.Status200OK);
         return app;
     }
 
     private static async Task<IResult> HandleAsync(
-        HttpContext context,
+        [AsParameters] SearchQueryParameters parameters,
         IMediator mediator,
         CancellationToken cancellationToken)
     {
         try
         {
-            SearchQuery query = Bind(context.Request.Query);
+            string? cursor = parameters.Cursor;
+            if (cursor is not null && !CursorCodec.TryDecode(cursor, out _, out _))
+                throw new ValidationException("Invalid query parameters.", [new ValidationFailure("cursor", "cursor is invalid.")]);
+
+            SearchQuery query = new(parameters.Q, parameters.Mode, parameters.Model, parameters.Persona, parameters.Source, parameters.Status, parameters.From, parameters.To, cursor, parameters.Limit ?? DefaultLimit);
             SearchResponse response = await mediator.Send(query, cancellationToken);
             return Results.Ok(response);
         }
@@ -36,39 +42,5 @@ public static class SearchEndpoint
         {
             return Results.BadRequest(new { errors = exception.Errors.Select(e => e.ErrorMessage) });
         }
-    }
-
-    private static SearchQuery Bind(IQueryCollection query)
-    {
-        int limit = ParseInt(query["limit"].FirstOrDefault(), DefaultLimit);
-        DateTimeOffset? from = ParseDateTimeOffset(query["from"].FirstOrDefault(), "from");
-        DateTimeOffset? to = ParseDateTimeOffset(query["to"].FirstOrDefault(), "to");
-        string? cursor = query["cursor"].FirstOrDefault();
-        if (cursor is not null && !CursorCodec.TryDecode(cursor, out _, out _))
-            throw new ValidationException("Invalid query parameters.", [new ValidationFailure("cursor", "cursor is invalid.")]);
-
-        return new SearchQuery(
-            query["q"].FirstOrDefault(),
-            query["mode"].FirstOrDefault(),
-            query["model"].FirstOrDefault(),
-            query["persona"].FirstOrDefault(),
-            query["source"].FirstOrDefault(),
-            query["status"].FirstOrDefault(),
-            from,
-            to,
-            cursor,
-            limit);
-    }
-
-    private static int ParseInt(string? value, int fallback)
-        => int.TryParse(value, out int parsed) ? parsed : fallback;
-
-    private static DateTimeOffset? ParseDateTimeOffset(string? value, string paramName)
-    {
-        if (value is null)
-            return null;
-        if (!DateTimeOffset.TryParse(value, out DateTimeOffset parsed))
-            throw new ValidationException("Invalid query parameters.", [new ValidationFailure(paramName, $"{paramName} is invalid.")]);
-        return parsed;
     }
 }

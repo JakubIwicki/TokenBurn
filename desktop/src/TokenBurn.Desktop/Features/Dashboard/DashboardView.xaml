@@ -1,0 +1,78 @@
+<UserControl x:Class="TokenBurn.Desktop.Features.Dashboard.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+             xmlns:lvcCore="clr-namespace:LiveChartsCore.SkiaSharpView;assembly=LiveChartsCore.SkiaSharpView">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="cost summary" Style="{StaticResource ViewTitleTextStyle}" />
+
+        <!-- Hero burn figure -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,16,0,0">
+            <TextBlock Text="burn " Style="{StaticResource DimLabelTextStyle}" VerticalAlignment="Bottom" />
+            <TextBlock Text="{Binding HeroCostText}"
+                       FontSize="{StaticResource FontSizeHeroBurn}"
+                       FontWeight="{StaticResource FontWeightBold}"
+                       Foreground="{StaticResource SpendBrush}" />
+        </StackPanel>
+
+        <!-- pricingCoverage — ALWAYS visible on any cost figure (blueprint non-negotiable) -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,8,0,0">
+            <TextBlock Text="pricingCoverage " Style="{StaticResource DimLabelTextStyle}" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding PricingCoverageText}"
+                       Foreground="{Binding PricingCoverage, Converter={StaticResource CoverageToBrush}}"
+                       FontWeight="{StaticResource FontWeightSemibold}" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <!-- Controls -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,16,0,8">
+            <TextBlock Text="from " Style="{StaticResource DimLabelTextStyle}" VerticalAlignment="Center" />
+            <DatePicker Width="130" Style="{StaticResource TerminalDatePickerStyle}"
+                        SelectedDate="{Binding From, Converter={StaticResource OffsetToDate}}" />
+            <TextBlock Text=" to " Style="{StaticResource DimLabelTextStyle}" VerticalAlignment="Center" Margin="8,0,0,0" />
+            <DatePicker Width="130" Margin="0,0,8,0" Style="{StaticResource TerminalDatePickerStyle}"
+                        SelectedDate="{Binding To, Converter={StaticResource OffsetToDate}}" />
+            <TextBlock Text="groupBy " Style="{StaticResource DimLabelTextStyle}" VerticalAlignment="Center" />
+            <ComboBox Width="120" Style="{StaticResource TerminalComboBoxStyle}"
+                      SelectedValue="{Binding GroupBy}" SelectedValuePath="Tag">
+                <ComboBoxItem Content="day" Tag="day" />
+                <ComboBoxItem Content="model" Tag="model" />
+                <ComboBoxItem Content="persona" Tag="persona" />
+            </ComboBox>
+            <Button Content="refresh" Margin="8,0,0,0"
+                    Command="{Binding RefreshCommand}" Style="{StaticResource TerminalButtonStyle}" />
+        </StackPanel>
+
+        <!-- Cost series -->
+        <Border Grid.Row="4" Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource HairlineBrush}" BorderThickness="1" Margin="0,0,0,4">
+            <Grid>
+                <lvc:CartesianChart Series="{Binding ChartSeries}" Background="Transparent">
+                    <lvc:CartesianChart.XAxes>
+                        <lvcCore:Axis Labels="{Binding ChartLabels, Converter={StaticResource ToList}}" />
+                    </lvc:CartesianChart.XAxes>
+                    <lvc:CartesianChart.YAxes>
+                        <lvcCore:Axis />
+                    </lvc:CartesianChart.YAxes>
+                </lvc:CartesianChart>
+
+                <Border Background="{StaticResource OverlayBrush}" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="loading…" Foreground="{StaticResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+            </Grid>
+        </Border>
+
+        <TextBlock Grid.Row="5" Text="{Binding ErrorMessage}" Style="{StaticResource ErrorTextStyle}"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVis}}" />
+    </Grid>
+</UserControl>

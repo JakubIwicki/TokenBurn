@@ -7,6 +7,8 @@ using TokenBurn.Processor.Domain;
 using TokenBurn.Processor.Persistence;
 using TokenBurn.Processor.Pricing;
 using TokenBurn.Processor.Tests.Bases;
+using TokenBurn.Testing.Common.Assertions;
+using TokenBurn.Testing.Common.Builders;
 using TokenBurn.Testing.Common.Mocking;
 
 namespace TokenBurn.Processor.Tests.Commands;
@@ -37,9 +39,14 @@ public sealed class ClaudeCodeTranscriptImportExecutorTests : TelemetryHandlerTe
             runs.Should().OnlyContain(r => r.PricingStatus == PricingStatus.Priced);
             runs.Select(r => r.SessionId).Should().OnlyHaveUniqueItems();
 
+            List<AgentMessage> messages = await Context.AgentMessages.AsNoTracking().ToListAsync();
+            messages.Should().NotBeEmpty();
+            messages.Should().OnlyContain(m => runs.Any(r => r.Id == m.RunId));
+
             await sut.ExecuteAsync(CreateCommand(tempDir), (_, _) => Task.CompletedTask, CancellationToken.None);
 
             (await Context.AgentRuns.CountAsync()).Should().Be(3);
+            (await Context.AgentMessages.CountAsync()).Should().Be(messages.Count);
         }
         finally
         {
@@ -59,6 +66,55 @@ public sealed class ClaudeCodeTranscriptImportExecutorTests : TelemetryHandlerTe
             await CreateSut().ExecuteAsync(CreateCommand(tempDir), (_, _) => Task.CompletedTask, CancellationToken.None);
 
             (await Context.AgentRuns.SingleAsync()).PricingStatus.Should().Be(PricingStatus.Quarantined);
+            (await Context.AgentMessages.CountAsync()).Should().Be(0);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task SkipsMessagePersistence_WhenReplayGuardRejectsUpdate()
+    {
+        await new PricingSeeder(Context).SeedAsync();
+        AgentRunUpserter upserter = new(Context);
+        AgentMessageUpserter messageUpserter = new(Context);
+        PricingEngine engine = new(Context);
+        DateTimeOffset seededEnd = new(2026, 7, 10, 0, 0, 0, TimeSpan.Zero);
+
+        // Seed the newer run + its message, priced and keyed to the stored id, so the import
+        // below is a guard-rejected replay (older ended_at) with distinguishable tokens.
+        AgentRun seeded = TestAgentRunBuilder.Init(Db)
+            .WithSessionId("replay-session").WithAgentId("")
+            .WithModelSlug("deepseek-v4-flash")
+            .WithInputTokens(100).WithCacheReadTokens(0).WithCacheWriteTokens(0).WithOutputTokens(5)
+            .WithTime(seededEnd).Completed(seededEnd)
+            .BuildWithoutDatabase();
+        await engine.PriceRunAsync(seeded, CancellationToken.None);
+        (Guid storedId, bool appliedFirst) = await upserter.UpsertAsync(seeded, CancellationToken.None);
+        appliedFirst.Should().BeTrue();
+        AgentMessage seededMessage = AgentMessage.Create(storedId, 1, "user", "seeded", null, "deepseek-v4-flash", 100, 0, 0, 5, seededEnd);
+        (await engine.PriceMessagesAsync(seeded, [seededMessage], CancellationToken.None)).AssertSuccess();
+        await messageUpserter.UpsertAsync(storedId, [seededMessage], CancellationToken.None);
+
+        string tempDir = CreateTempTranscriptDir();
+        try
+        {
+            // The older replay is rejected by the upsert's ended_at guard (applied = false), so
+            // its messages must NOT overwrite the stored ones with a re-priced cost.
+            File.WriteAllText(
+                Path.Combine(tempDir, "older.jsonl"),
+                TranscriptAt("replay-session", "deepseek-v4-flash", "2026-07-01T00:00:00.000Z", inputTokens: 999));
+
+            await CreateSut().ExecuteAsync(CreateCommand(tempDir), (_, _) => Task.CompletedTask, CancellationToken.None);
+
+            AgentRun run = await Context.AgentRuns.AsNoTracking().SingleAsync(r => r.Id == storedId);
+            run.EndedAt.Should().Be(seededEnd);
+            AgentMessage message = (await Context.AgentMessages.AsNoTracking().ToListAsync()).Should().ContainSingle().Which;
+            message.RunId.Should().Be(storedId);
+            message.InputTokens.Should().Be(100);
+            message.CostUsd.Should().Be(run.CostUsd);
         }
         finally
         {
@@ -275,6 +331,15 @@ public sealed class ClaudeCodeTranscriptImportExecutorTests : TelemetryHandlerTe
             message = new { role = "user", model, usage = new { input_tokens = 10, output_tokens = 5 } }
         });
 
+    private static string TranscriptAt(string sessionId, string model, string timestamp, long inputTokens)
+        => JsonSerializer.Serialize(new
+        {
+            type = "user",
+            timestamp,
+            sessionId,
+            message = new { role = "user", model, usage = new { input_tokens = inputTokens, output_tokens = 5 } }
+        });
+
     private static string TranscriptWithNullCacheTokens(string sessionId, string model)
         => JsonSerializer.Serialize(new
         {
@@ -314,6 +379,7 @@ public sealed class ClaudeCodeTranscriptImportExecutorTests : TelemetryHandlerTe
         new ClaudeCodeTranscriptAdapter(MockLogger<ClaudeCodeTranscriptAdapter>.GetSuccessful().Object),
         new PricingEngine(Context),
         new AgentRunUpserter(Context),
+        new AgentMessageUpserter(Context),
         Clock,
         MockLogger<ClaudeCodeTranscriptImportExecutor>.GetSuccessful().Object);
 

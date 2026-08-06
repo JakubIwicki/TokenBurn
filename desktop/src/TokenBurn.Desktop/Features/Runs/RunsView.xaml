@@ -1,0 +1,160 @@
+<UserControl x:Class="TokenBurn.Desktop.Features.Runs.RunsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="runs" Style="{StaticResource ViewTitleTextStyle}" />
+
+        <!-- Filters -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,10">
+            <TextBox Width="150" Style="{StaticResource TerminalTextBoxStyle}"
+                     Text="{Binding ModelFilter, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text=" model" Style="{StaticResource DimLabelTextStyle}" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <TextBox Width="150" Style="{StaticResource TerminalTextBoxStyle}"
+                     Text="{Binding PersonaFilter, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text=" persona" Style="{StaticResource DimLabelTextStyle}" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <TextBox Width="90" Style="{StaticResource TerminalTextBoxStyle}"
+                     Text="{Binding MinCost, UpdateSourceTrigger=LostFocus}" />
+            <TextBlock Text=" minCost" Style="{StaticResource DimLabelTextStyle}" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <Button Content="refresh" Command="{Binding RefreshCommand}" Style="{StaticResource TerminalButtonStyle}" />
+        </StackPanel>
+
+        <!-- Run table -->
+        <Grid Grid.Row="2">
+            <ListView ItemsSource="{Binding Runs}"
+                      ItemContainerStyle="{StaticResource TerminalListItemStyle}"
+                      Background="Transparent" BorderThickness="0"
+                      SelectionChanged="OnRunsSelectionChanged">
+                <ListView.View>
+                    <GridView ColumnHeaderContainerStyle="{StaticResource TerminalColumnHeaderStyle}">
+                        <GridViewColumn Header="session" Width="200">
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="session" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Session}" Style="{StaticResource CellTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="persona" Width="120">
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="persona" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Persona}" Style="{StaticResource CellTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="model" Width="150">
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="model" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Model}" Style="{StaticResource CellTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="status" Width="110">
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="status" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Style="{StaticResource StatusDotStyle}" Margin="8,0,6,0" />
+                                        <TextBlock Text="{Binding Status}" Style="{StaticResource CellTextStyle}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="tokens" Width="90">
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="tokens" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" />
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Tokens}" Style="{StaticResource CellTextStyle}" HorizontalAlignment="Right" Margin="0,0,8,0" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="cost" Width="90">
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="cost" Style="{StaticResource ColumnHeaderTextStyle}" HorizontalAlignment="Right" />
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Cost}" Style="{StaticResource CellTextStyle}"
+                                               Foreground="{StaticResource SpendBrush}" FontWeight="{StaticResource FontWeightSemibold}"
+                                               HorizontalAlignment="Right" Margin="0,0,8,0" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="coverage" Width="110">
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="coverage" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding PricingStatus}" Style="{StaticResource CoverageStatusTextStyle}" Margin="8,0,0,0" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+
+            <!-- Empty state -->
+            <TextBlock Text="no runs matched — adjust filters"
+                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource EmptyStateTextStyle}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Runs.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+            <!-- Loading overlay -->
+            <Border Background="{StaticResource OverlayBrush}" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="loading…" Foreground="{StaticResource TextSecondaryBrush}"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+        </Grid>
+
+        <!-- Paging -->
+        <Button Grid.Row="3" Content="load more" Margin="0,8,0,0" HorizontalAlignment="Left"
+                Command="{Binding LoadMoreCommand}" Style="{StaticResource TerminalButtonStyle}" />
+
+        <TextBlock Grid.Row="4" Text="{Binding ErrorMessage}" Style="{StaticResource ErrorTextStyle}"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVis}}" />
+    </Grid>
+</UserControl>

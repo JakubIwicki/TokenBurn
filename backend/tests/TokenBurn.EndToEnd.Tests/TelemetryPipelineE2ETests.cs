@@ -28,6 +28,14 @@ using RunStatus = processor::TokenBurn.Processor.Domain.RunStatus;
 using PricingStatus = processor::TokenBurn.Processor.Domain.PricingStatus;
 using LedgerStatus = processor::TokenBurn.Processor.Adapters.LedgerStatus;
 using RunReplayService = processor::TokenBurn.Processor.Commands.RunReplayService;
+using AgentMessage = processor::TokenBurn.Processor.Domain.AgentMessage;
+using AgentMessageEnvelopeMapper = processor::TokenBurn.Processor.Domain.AgentMessageEnvelopeMapper;
+using AgentRunUpserter = processor::TokenBurn.Processor.Persistence.AgentRunUpserter;
+using AgentMessageUpserter = processor::TokenBurn.Processor.Persistence.AgentMessageUpserter;
+using ClaudeCodeTranscriptAdapter = processor::TokenBurn.Processor.Adapters.ClaudeCodeTranscriptAdapter;
+using PricingEngine = processor::TokenBurn.Processor.Pricing.PricingEngine;
+using WasteFinding = processor::TokenBurn.Processor.Domain.WasteFinding;
+using WasteFindingKind = processor::TokenBurn.Processor.Domain.WasteFindingKind;
 
 namespace TokenBurn.EndToEnd.Tests;
 
@@ -35,6 +43,7 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
 {
     private const string FixtureRelativePath = "Fixtures/delegate-ledger.otlp.json";
     private const string SharedSessionFixtureRelativePath = "Fixtures/delegate-ledger-shared-session.otlp.json";
+    private const string TranscriptReplayFixtureRelativePath = "Fixtures/transcript-replay.jsonl";
     private const string ProgressSessionId = "shared-sess-2";
     private const string ProgressHandle = "20260802-delegate-progress-h1";
     private const string CompletedSurvivesSessionId = "shared-sess-3";
@@ -337,6 +346,52 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
         Assert.Equal(1L, await CountElasticsearchDocumentsForRunAsync(run.Id));
     }
 
+    [Fact]
+    public async Task Replay_DetectsContextReplayFinding_AndReplayAgain_KeepsOneRow()
+    {
+        (Guid storedId, int messageCount) = await SeedContextReplayRunAsync();
+
+        using (IServiceScope sanityScope = _fixture.ProcessorFactory.Services.CreateScope())
+        {
+            TelemetryDb db = sanityScope.ServiceProvider.GetRequiredService<TelemetryDb>();
+            AgentRun stored = await db.AgentRuns.SingleAsync(run => run.Id == storedId);
+            Assert.NotNull(stored.EndedAt);
+            Assert.Equal(PricingStatus.Priced, stored.PricingStatus);
+            Assert.Equal(messageCount, await db.AgentMessages.CountAsync(message => message.RunId == storedId));
+        }
+
+        using (IServiceScope replayScope = _fixture.ProcessorFactory.Services.CreateScope())
+        {
+            RunReplayService replay = replayScope.ServiceProvider.GetRequiredService<RunReplayService>();
+            await replay.ReplayAsync(CancellationToken.None);
+        }
+
+        bool detected = await WaitUntilAsync(
+            async () => await CountWasteFindingsForRunAsync(storedId, WasteFindingKind.ContextReplay) == 1,
+            PipelineTimeout);
+        Assert.True(detected, $"ContextReplay finding for run {storedId} was not persisted within the timeout.");
+
+        WasteFinding? firstFinding = await LoadWasteFindingAsync(storedId, WasteFindingKind.ContextReplay);
+        Assert.NotNull(firstFinding);
+        DateTimeOffset firstDetectedAt = firstFinding.DetectedAt;
+
+        using (IServiceScope replayScope = _fixture.ProcessorFactory.Services.CreateScope())
+        {
+            RunReplayService replay = replayScope.ServiceProvider.GetRequiredService<RunReplayService>();
+            await replay.ReplayAsync(CancellationToken.None);
+        }
+
+        DateTimeOffset settleDeadline = TimeProvider.System.GetUtcNow().Add(RedeliveryWatchWindow);
+        do
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(250));
+            Assert.Equal(1, await CountWasteFindingsForRunAsync(storedId, WasteFindingKind.ContextReplay));
+            WasteFinding? finding = await LoadWasteFindingAsync(storedId, WasteFindingKind.ContextReplay);
+            Assert.NotNull(finding);
+            Assert.Equal(firstDetectedAt, finding.DetectedAt);
+        } while (TimeProvider.System.GetUtcNow() < settleDeadline);
+    }
+
     private Task<HttpResponseMessage> PostAsync(string json)
         => _client.PostAsync("/v1/traces", new StringContent(json, Encoding.UTF8, "application/json"));
 
@@ -369,11 +424,46 @@ public sealed class TelemetryPipelineE2ETests : IClassFixture<TelemetryPipelineE
         return await db.AgentRuns.CountAsync(run => run.SessionId == sessionId && run.AgentId == agentId);
     }
 
+    private async Task<int> CountWasteFindingsForRunAsync(Guid runId, WasteFindingKind kind)
+    {
+        using IServiceScope scope = _fixture.ProcessorFactory.Services.CreateScope();
+        TelemetryDb db = scope.ServiceProvider.GetRequiredService<TelemetryDb>();
+        return await db.WasteFindings.CountAsync(finding => finding.RunId == runId && finding.Kind == kind);
+    }
+
     private async Task<AgentRun> LoadAgentRunAsync(string sessionId, string agentId)
     {
         using IServiceScope scope = _fixture.ProcessorFactory.Services.CreateScope();
         TelemetryDb db = scope.ServiceProvider.GetRequiredService<TelemetryDb>();
         return await db.AgentRuns.SingleAsync(run => run.SessionId == sessionId && run.AgentId == agentId);
+    }
+
+    private async Task<WasteFinding?> LoadWasteFindingAsync(Guid runId, WasteFindingKind kind)
+    {
+        using IServiceScope scope = _fixture.ProcessorFactory.Services.CreateScope();
+        TelemetryDb db = scope.ServiceProvider.GetRequiredService<TelemetryDb>();
+        return await db.WasteFindings.SingleOrDefaultAsync(finding => finding.RunId == runId && finding.Kind == kind);
+    }
+
+    private async Task<(Guid StoredId, int MessageCount)> SeedContextReplayRunAsync()
+    {
+        using IServiceScope scope = _fixture.ProcessorFactory.Services.CreateScope();
+        TelemetryDb db = scope.ServiceProvider.GetRequiredService<TelemetryDb>();
+        ClaudeCodeTranscriptAdapter adapter = scope.ServiceProvider.GetRequiredService<ClaudeCodeTranscriptAdapter>();
+        string json = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, TranscriptReplayFixtureRelativePath));
+        var envelope = adapter.Map(json).Single();
+        AgentRun run = AgentRunEnvelopeMapper.ToAgentRun(envelope);
+        var pricing = await new PricingEngine(db).PriceRunAsync(run, CancellationToken.None);
+        Assert.True(pricing.IsSuccess, $"Pricing the seeded run failed: {pricing.ErrorMessage}");
+        (Guid storedId, bool applied) = await new AgentRunUpserter(db).UpsertAsync(run, CancellationToken.None);
+        Assert.True(applied, "Seeding the run must apply on first insert.");
+        AgentMessage[] messages = envelope.Messages
+            .Select(message => AgentMessageEnvelopeMapper.ToAgentMessage(storedId, message))
+            .ToArray();
+        var messagePricing = await new PricingEngine(db).PriceMessagesAsync(run, messages, CancellationToken.None);
+        Assert.True(messagePricing.IsSuccess, $"Pricing the seeded messages failed: {messagePricing.ErrorMessage}");
+        await new AgentMessageUpserter(db).UpsertAsync(storedId, messages, CancellationToken.None);
+        return (storedId, messages.Length);
     }
 
     private async Task<Dictionary<string, JsonElement>?> TryGetElasticsearchSourceAsync(Guid runId)
