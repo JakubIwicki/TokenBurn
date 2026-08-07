@@ -40,6 +40,9 @@ public sealed partial class RunsViewModel : ObservableObject, IActivatable
     private string? _personaFilter;
 
     [ObservableProperty]
+    private string? _sourceFilter;
+
+    [ObservableProperty]
     private double? _minCost;
 
     [ObservableProperty]
@@ -78,7 +81,7 @@ public sealed partial class RunsViewModel : ObservableObject, IActivatable
         ErrorMessage = "";
         try
         {
-            var response = await _api.RunsAsync(From, To, ModelFilter, PersonaFilter, MinCost, null, PageSize, ct);
+            var response = await _api.RunsAsync(From, To, ModelFilter, PersonaFilter, MinCost, null, PageSize, SourceFilter, ct);
             _dispatcher.Invoke(() =>
             {
                 Runs.Clear();
@@ -112,7 +115,7 @@ public sealed partial class RunsViewModel : ObservableObject, IActivatable
             return;
         try
         {
-            var response = await _api.RunsAsync(From, To, ModelFilter, PersonaFilter, MinCost, cursor, PageSize, ct);
+            var response = await _api.RunsAsync(From, To, ModelFilter, PersonaFilter, MinCost, cursor, PageSize, SourceFilter, ct);
             _dispatcher.Invoke(() =>
             {
                 foreach (var run in response.Runs)
@@ -135,6 +138,7 @@ public sealed partial class RunsViewModel : ObservableObject, IActivatable
 public sealed record RunRow(
     Guid Id,
     string Session,
+    string Source,
     string Persona,
     string Model,
     string Status,
@@ -145,6 +149,7 @@ public sealed record RunRow(
     public static RunRow From(RunSummary run) => new(
         run.Id,
         run.SessionId,
+        run.Source ?? "—",
         run.Persona ?? "—",
         run.ModelSlug ?? "—",
         run.Status,

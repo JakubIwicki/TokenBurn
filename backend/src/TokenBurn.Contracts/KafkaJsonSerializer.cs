@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace TokenBurn.Processor.Infrastructure;
+namespace TokenBurn.Contracts;
 
 /// <summary>
 ///     Shared JSON (de)serialization for the topic-chain contracts. camelCase

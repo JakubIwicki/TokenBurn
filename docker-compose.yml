@@ -85,6 +85,7 @@ services:
       ConnectionStrings__Identity: ${IDENTITY_CONNECTION_STRING:?IDENTITY_CONNECTION_STRING must be set}
       Jwt__Authority: ${JWT_AUTHORITY_URL:?JWT_AUTHORITY_URL must be set}
       Identity__CollectorClientSecret: ${IDENTITY__COLLECTORCLIENTSECRET:?IDENTITY__COLLECTORCLIENTSECRET must be set}
+      Identity__SelfTelemetryClientSecret: ${IDENTITY__SELFTELEMETRYCLIENTSECRET:-}
       Identity__DevUser__Username: ${IDENTITY__DEVUSER__USERNAME:?IDENTITY__DEVUSER__USERNAME must be set}
       Identity__DevUser__Password: ${IDENTITY__DEVUSER__PASSWORD:?IDENTITY__DEVUSER__PASSWORD must be set}
     networks: [tokenburn]
@@ -131,6 +132,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: ${ASPNETCORE_URLS:?ASPNETCORE_URLS must be set}
       ConnectionStrings__Insights: ${INSIGHTS_CONNECTION_STRING:?INSIGHTS_CONNECTION_STRING must be set}
+      Kafka__BootstrapServers: ${KAFKA_BOOTSTRAP_SERVERS:?KAFKA_BOOTSTRAP_SERVERS must be set}
       Insights__RateLimit__TokenLimit: 10000
       Insights__RateLimit__TokensPerPeriod: 10000
       Elasticsearch__Uri: ${ELASTICSEARCH_URI:?ELASTICSEARCH_URI must be set}
@@ -148,6 +150,8 @@ services:
       postgres: {condition: service_healthy}
       elasticsearch: {condition: service_healthy}
       identity: {condition: service_healthy}
+      kafka: {condition: service_healthy}
+      processor: {condition: service_healthy}
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health/ready"]
       interval: 10s
@@ -171,10 +175,18 @@ services:
       Jwt__MetadataAddress: ${JWT_METADATA_ADDRESS:?JWT_METADATA_ADDRESS must be set}
       Processor__Replay__Enabled: ${PROCESSOR_REPLAY_ENABLED:-false}
       Processor__Embeddings__Enabled: ${PROCESSOR_EMBEDDINGS_ENABLED:-false}
+      Processor__Aggregate__Enabled: ${PROCESSOR_AGGREGATE_ENABLED:-false}
+      Processor__Aggregate__MinSize: ${PROCESSOR_AGGREGATE_MIN_SIZE:-5}
       Documents__ChunkMaxTokens: ${DOCUMENTS_CHUNK_MAX_TOKENS:-512}
       Documents__TokenCharsPerToken: ${DOCUMENTS_TOKEN_CHARS_PER_TOKEN:-4}
       Documents__MaxFileBytes: ${DOCUMENTS_MAX_FILE_BYTES:-5000000}
       Documents__EmbeddingBatchSize: ${DOCUMENTS_EMBEDDING_BATCH_SIZE:-64}
+      SelfTelemetry__Enabled: ${SELF_TELEMETRY_ENABLED:-false}
+      SelfTelemetry__IntervalMinutes: ${SELF_TELEMETRY_INTERVAL_MINUTES:-60}
+      SelfTelemetry__IdentityUrl: http://identity:8080
+      SelfTelemetry__IngestUrl: http://ingest:8080
+      SelfTelemetry__ClientId: tokenburn-self
+      SelfTelemetry__ClientSecret: ${IDENTITY__SELFTELEMETRYCLIENTSECRET:-}
     volumes:
       - ${CLAUDE_TRANSCRIPTS_DIR:?CLAUDE_TRANSCRIPTS_DIR must be set}:/data/transcripts:ro
       - ${DOCUMENTS_DIR:?DOCUMENTS_DIR must be set}:/data/documents:ro
@@ -199,6 +211,7 @@ services:
       NODE_ENV: ${NODE_ENV:?NODE_ENV must be set}
       PORT: ${WEB_PORT:?WEB_PORT must be set}
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:?NEXT_PUBLIC_API_BASE_URL must be set}
+      API_INTERNAL_URL: ${API_INTERNAL_URL:-http://insights:8080}
     networks: [tokenburn]
     expose: ["3000"]
     depends_on:

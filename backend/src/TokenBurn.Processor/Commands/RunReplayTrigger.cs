@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using TokenBurn.Processor.Aggregation;
 
 namespace TokenBurn.Processor.Commands;
 
@@ -14,6 +15,7 @@ namespace TokenBurn.Processor.Commands;
 internal sealed class RunReplayTrigger(
     IServiceScopeFactory scopeFactory,
     IConfiguration configuration,
+    ReplayCompletionNotifier replayCompletion,
     ILogger<RunReplayTrigger> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -30,6 +32,9 @@ internal sealed class RunReplayTrigger(
             RunReplayService replay = scope.ServiceProvider.GetRequiredService<RunReplayService>();
             int published = await replay.ReplayAsync(stoppingToken);
             logger.LogInformation("Run replay completed; {Published} runs re-published to {Topic}.", published, Contracts.KafkaTopics.Priced);
+            // Only a successful replay unblocks the aggregate rebuild — on failure the process
+            // crashes below and the notifier stays pending, so the rebuild never runs.
+            replayCompletion.Complete();
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { }
         catch (Exception exception)

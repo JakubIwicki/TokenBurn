@@ -13,6 +13,9 @@ namespace TokenBurn.Processor.Adapters;
 ///     the session = run spec. Span identity derives from session.id, falling
 ///     back to the span handle when the session id is blank; a span with neither
 ///     is skipped with a logged reason (rule 2a — never emit a blank identity).
+///     The run's source is taken from the max-cost span's resource
+///     tokenburn.source, defaulting to "delegate-ledger" when absent; no source
+///     is filtered out (rule 1 — source is provenance).
 /// </summary>
 public sealed class OtlpGenAiAdapter(ILogger<OtlpGenAiAdapter> logger)
 {
@@ -28,8 +31,6 @@ public sealed class OtlpGenAiAdapter(ILogger<OtlpGenAiAdapter> logger)
             JsonElement resource = resourceSpan.GetProperty("resource");
             string? sessionId = ReadAttribute(resource, "session.id", AttributeKind.String);
             string source = ReadAttribute(resource, "tokenburn.source", AttributeKind.String) ?? "delegate-ledger";
-            if (!string.Equals(source, "delegate-ledger", StringComparison.Ordinal))
-                continue;
 
             if (!resourceSpan.TryGetProperty("scopeSpans", out JsonElement scopes))
                 continue;
@@ -58,6 +59,7 @@ public sealed class OtlpGenAiAdapter(ILogger<OtlpGenAiAdapter> logger)
                     }
                     group.Add(new SpanData(
                         handle ?? "",
+                        source,
                         ReadAttribute(span, "tokenburn.persona", AttributeKind.String),
                         ReadAttribute(span, "gen_ai.request.model", AttributeKind.String),
                         LedgerStatus.FromLedger(ReadAttribute(span, "tokenburn.status", AttributeKind.String)),
@@ -94,7 +96,7 @@ public sealed class OtlpGenAiAdapter(ILogger<OtlpGenAiAdapter> logger)
         {
             SessionId = group.Key,
             AgentId = "",
-            Source = "delegate-ledger",
+            Source = maxCost.Source,
             ExternalId = string.IsNullOrWhiteSpace(maxCost.Handle) ? null : maxCost.Handle,
             Persona = maxCost.Persona,
             ModelSlug = maxCost.ModelSlug,
@@ -147,6 +149,7 @@ public sealed class OtlpGenAiAdapter(ILogger<OtlpGenAiAdapter> logger)
 
     private sealed record SpanData(
         string Handle,
+        string Source,
         string? Persona,
         string? ModelSlug,
         RunStatus Status,

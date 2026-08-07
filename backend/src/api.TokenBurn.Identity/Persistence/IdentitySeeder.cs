@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using OpenIddict.Abstractions;
 using IdentityUser = Api.TokenBurn.Identity.Domain.IdentityUser;
 
@@ -9,7 +10,8 @@ public sealed class IdentitySeeder(
     IdentityDbContext db,
     IOpenIddictApplicationManager applications,
     IOpenIddictScopeManager scopes,
-    IConfiguration configuration)
+    IConfiguration configuration,
+    ILogger<IdentitySeeder> logger)
 {
     private static readonly string[] UserScopes = ["insights.read", "ask.invoke", "admin"];
 
@@ -17,6 +19,7 @@ public sealed class IdentitySeeder(
     {
         await SeedScopesAsync(cancellationToken);
         await SeedCollectorAsync(cancellationToken);
+        await SeedSelfTelemetryClientAsync(cancellationToken);
         await SeedDesktopClientAsync(cancellationToken);
         await SeedUserAsync(cancellationToken);
     }
@@ -50,6 +53,37 @@ public sealed class IdentitySeeder(
             ClientId = clientId,
             ClientSecret = secret,
             DisplayName = "TokenBurn Collector",
+            Permissions =
+            {
+                OpenIddictConstants.Permissions.Endpoints.Token,
+                OpenIddictConstants.Permissions.GrantTypes.ClientCredentials,
+                OpenIddictConstants.Permissions.Prefixes.Scope + "telemetry.write"
+            }
+        }, cancellationToken);
+    }
+
+    private async Task SeedSelfTelemetryClientAsync(CancellationToken cancellationToken)
+    {
+        const string clientId = "tokenburn-self";
+        if (await applications.FindByClientIdAsync(clientId, cancellationToken) is not null)
+            return;
+
+        string? secret = configuration["Identity:SelfTelemetryClientSecret"];
+        if (string.IsNullOrWhiteSpace(secret))
+        {
+            // Self-telemetry is default-off: a blank secret must not fail the boot — the
+            // Processor emitter simply has no credential to use until one is configured.
+            logger.LogInformation(
+                "Identity:SelfTelemetryClientSecret is not configured; skipping the {ClientId} client seed.",
+                clientId);
+            return;
+        }
+
+        await applications.CreateAsync(new OpenIddictApplicationDescriptor
+        {
+            ClientId = clientId,
+            ClientSecret = secret,
+            DisplayName = "TokenBurn Self-Telemetry",
             Permissions =
             {
                 OpenIddictConstants.Permissions.Endpoints.Token,

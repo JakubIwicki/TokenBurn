@@ -138,6 +138,38 @@ public sealed class OtlpGenAiAdapterTests
     }
 
     [Fact]
+    public void Maps_SourceFromResource_WhenTokenburnSourceSet()
+    {
+        string payload = BuildOtlp(ResourceSpanWithSource("sess-self", "tokenburn-self", Span(handle: "h1")));
+
+        NormalizedRun run = CreateSut().Map(payload).Single();
+
+        run.Source.Should().Be("tokenburn-self");
+    }
+
+    [Fact]
+    public void Defaults_SourceToDelegateLedger_WhenTokenburnSourceAbsent()
+    {
+        string payload = BuildOtlp(ResourceSpanWithSource("sess-default", null, Span(handle: "h1")));
+
+        NormalizedRun run = CreateSut().Map(payload).Single();
+
+        run.Source.Should().Be("delegate-ledger");
+    }
+
+    [Fact]
+    public void Merge_UsesMaxCostSpanSource()
+    {
+        string payload = BuildOtlp(
+            ResourceSpanWithSource("shared-sess", "delegate-ledger", Span(handle: "h1", input: 100, cost: 0.25m, status: "ok")),
+            ResourceSpanWithSource("shared-sess", "tokenburn-self", Span(handle: "h2", input: 4200, cost: 0.5m, status: "ok")));
+
+        NormalizedRun run = CreateSut().Map(payload).Single();
+
+        run.Source.Should().Be("tokenburn-self");
+    }
+
+    [Fact]
     public void ReturnsEmpty_WhenPayloadHasNoResourceSpans()
     {
         var envelopes = CreateSut().Map("{}");
@@ -155,6 +187,23 @@ public sealed class OtlpGenAiAdapterTests
         JsonArray attributes = sessionId is null
             ? new JsonArray(StringAttr("tokenburn.source", "delegate-ledger"))
             : new JsonArray(StringAttr("session.id", sessionId), StringAttr("tokenburn.source", "delegate-ledger"));
+        return new JsonObject
+        {
+            ["resource"] = new JsonObject { ["attributes"] = attributes },
+            ["scopeSpans"] = new JsonArray(
+                new JsonObject
+                {
+                    ["scope"] = new JsonObject { ["name"] = "delegate-ledger" },
+                    ["spans"] = new JsonArray(spans)
+                })
+        };
+    }
+
+    private static JsonObject ResourceSpanWithSource(string? sessionId, string? source, params JsonObject[] spans)
+    {
+        JsonArray attributes = new();
+        if (sessionId is not null) attributes.Add(StringAttr("session.id", sessionId));
+        if (source is not null) attributes.Add(StringAttr("tokenburn.source", source));
         return new JsonObject
         {
             ["resource"] = new JsonObject { ["attributes"] = attributes },

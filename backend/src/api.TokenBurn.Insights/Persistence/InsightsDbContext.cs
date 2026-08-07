@@ -12,11 +12,15 @@ public sealed class InsightsDbContext(DbContextOptions<InsightsDbContext> option
 {
     public DbSet<AgentRunReadModel> AgentRuns => Set<AgentRunReadModel>();
     public DbSet<WasteFindingReadModel> WasteFindings => Set<WasteFindingReadModel>();
+    public DbSet<ModelPriceReadModel> ModelPrices => Set<ModelPriceReadModel>();
+    public DbSet<MetricAggregateReadModel> MetricAggregates => Set<MetricAggregateReadModel>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("telemetry");
         modelBuilder.ApplyConfiguration(new AgentRunReadConfiguration());
         modelBuilder.ApplyConfiguration(new WasteFindingReadConfiguration());
+        modelBuilder.ApplyConfiguration(new ModelPriceReadConfiguration());
+        modelBuilder.ApplyConfiguration(new MetricAggregateReadConfiguration());
     }
 }

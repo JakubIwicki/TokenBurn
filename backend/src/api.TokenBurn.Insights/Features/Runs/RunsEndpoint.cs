@@ -38,7 +38,7 @@ public static class RunsEndpoint
             if (cursor is not null && !CursorCodec.TryDecode(cursor, out _, out _))
                 throw new ValidationException("Invalid query parameters.", [new ValidationFailure("cursor", "cursor is invalid.")]);
 
-            RunsQuery query = new(parameters.From, parameters.To, parameters.Model, parameters.Persona, parameters.MinCost, cursor, parameters.Limit ?? DefaultLimit);
+            RunsQuery query = new(parameters.From, parameters.To, parameters.Model, parameters.Persona, parameters.MinCost, cursor, parameters.Limit ?? DefaultLimit, parameters.Source);
             RunsResponse response = await mediator.Send(query, cancellationToken);
             return Results.Ok(response);
         }

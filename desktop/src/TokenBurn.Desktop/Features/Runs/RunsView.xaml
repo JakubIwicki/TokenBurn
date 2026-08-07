@@ -21,6 +21,9 @@
             <TextBox Width="150" Style="{StaticResource TerminalTextBoxStyle}"
                      Text="{Binding PersonaFilter, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock Text=" persona" Style="{StaticResource DimLabelTextStyle}" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <TextBox Width="130" Style="{StaticResource TerminalTextBoxStyle}"
+                     Text="{Binding SourceFilter, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text=" source" Style="{StaticResource DimLabelTextStyle}" VerticalAlignment="Center" Margin="0,0,8,0" />
             <TextBox Width="90" Style="{StaticResource TerminalTextBoxStyle}"
                      Text="{Binding MinCost, UpdateSourceTrigger=LostFocus}" />
             <TextBlock Text=" minCost" Style="{StaticResource DimLabelTextStyle}" VerticalAlignment="Center" Margin="0,0,8,0" />
@@ -44,6 +47,18 @@
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Session}" Style="{StaticResource CellTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="source" Width="110">
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="source" Style="{StaticResource ColumnHeaderTextStyle}" />
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Source}" Style="{StaticResource CellTextStyle}" />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>

@@ -7,4 +7,5 @@ public sealed record RunsQueryParameters(
     string? Persona,
     decimal? MinCost,
     string? Cursor,
-    int? Limit);
+    int? Limit,
+    string? Source = null);

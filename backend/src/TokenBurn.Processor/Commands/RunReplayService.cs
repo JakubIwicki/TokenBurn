@@ -2,7 +2,6 @@ using Confluent.Kafka;
 using Microsoft.EntityFrameworkCore;
 using TokenBurn.Contracts;
 using TokenBurn.Processor.Domain;
-using TokenBurn.Processor.Infrastructure;
 using TokenBurn.Processor.Persistence;
 
 namespace TokenBurn.Processor.Commands;

@@ -288,6 +288,62 @@ namespace TokenBurn.Processor.Migrations
                         });
                 });
 
+            modelBuilder.Entity("TokenBurn.Processor.Domain.MetricBucket", b =>
+                {
+                    b.Property<DateOnly>("BucketDay")
+                        .HasColumnType("date")
+                        .HasColumnName("bucket_day");
+
+                    b.Property<string>("ModelSlug")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("model_slug");
+
+                    b.Property<string>("Service")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("service");
+
+                    b.Property<long>("CacheReadTokens")
+                        .HasColumnType("bigint")
+                        .HasColumnName("cache_read_tokens");
+
+                    b.Property<long>("CacheWriteTokens")
+                        .HasColumnType("bigint")
+                        .HasColumnName("cache_write_tokens");
+
+                    b.Property<decimal>("CostUsd")
+                        .HasPrecision(20, 10)
+                        .HasColumnType("numeric(20,10)")
+                        .HasColumnName("cost_usd");
+
+                    b.Property<long>("InputTokens")
+                        .HasColumnType("bigint")
+                        .HasColumnName("input_tokens");
+
+                    b.Property<long>("MessageCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("message_count");
+
+                    b.Property<long>("OutputTokens")
+                        .HasColumnType("bigint")
+                        .HasColumnName("output_tokens");
+
+                    b.Property<long>("PricedRunCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("priced_run_count");
+
+                    b.Property<long>("RunCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("run_count");
+
+                    b.HasKey("BucketDay", "ModelSlug", "Service");
+
+                    b.HasIndex("ModelSlug", "BucketDay");
+
+                    b.ToTable("aggregate", "metrics");
+                });
+
             modelBuilder.Entity("TokenBurn.Processor.Domain.SearchDocument", b =>
                 {
                     b.Property<long>("StoredId")

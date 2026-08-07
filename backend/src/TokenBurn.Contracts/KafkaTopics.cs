@@ -10,4 +10,5 @@ public static class KafkaTopics
     public const string Raw = "telemetry.raw";
     public const string Priced = "telemetry.priced";
     public const string Indexed = "telemetry.indexed";
+    public const string Metrics = "metrics.aggregate";
 }

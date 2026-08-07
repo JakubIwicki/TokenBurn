@@ -16,6 +16,9 @@
     <ProjectReference Include="../../src/TokenBurn.Processor/TokenBurn.Processor.csproj">
       <Aliases>processor</Aliases>
     </ProjectReference>
+    <ProjectReference Include="../../src/api.TokenBurn.Insights/api.TokenBurn.Insights.csproj">
+      <Aliases>insights</Aliases>
+    </ProjectReference>
     <None Include="Fixtures/delegate-ledger.otlp.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -2,6 +2,7 @@
   <PropertyGroup><OutputType>Exe</OutputType><AssemblyName>api.TokenBurn.Insights</AssemblyName><RootNamespace>Api.TokenBurn.Insights</RootNamespace></PropertyGroup>
   <ItemGroup><ProjectReference Include="../TokenBurn.Common/TokenBurn.Common.csproj" />
     <ProjectReference Include="../TokenBurn.Contracts/TokenBurn.Contracts.csproj" />
+    <PackageReference Include="Confluent.Kafka" />
     <PackageReference Include="Elastic.Clients.Elasticsearch" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />

@@ -5,8 +5,9 @@ using TokenBurn.Contracts;
 namespace TokenBurn.Processor.Infrastructure;
 
 /// <summary>
-///     Ensures the phase-3 chain topics exist before any hosted consumer
-///     subscribes. Called once at processor startup from
+///     Ensures the telemetry chain topics (priced, indexed) and the metrics
+///     aggregate topic exist before any hosted consumer subscribes. Called
+///     once at processor startup from
 ///     <c>InitializeProcessorAsync</c> — endpoint-authorization tests never
 ///     invoke it, so they stay broker-free. Mirrors the ingest outbox's
 ///     topic creation (3 partitions, RF 1, tolerate already-exists) with the
@@ -30,7 +31,7 @@ public sealed class KafkaTopicInitializer(IConfiguration configuration, ILogger<
                 ?? throw new InvalidOperationException("Kafka:BootstrapServers must be configured.")
         }).Build();
 
-        foreach (string topic in new[] { KafkaTopics.Priced, KafkaTopics.Indexed })
+        foreach (string topic in new[] { KafkaTopics.Priced, KafkaTopics.Indexed, KafkaTopics.Metrics })
         {
             await EnsureTopicAsync(admin, topic, cancellationToken);
         }

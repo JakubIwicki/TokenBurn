@@ -8,6 +8,7 @@ namespace Api.TokenBurn.Insights.Features.Runs;
 ///     <c>/api/search</c> cursor, and covered by the Processor's existing
 ///     index.
 /// </summary>
+/// <param name="Source">Optional source filter — filters telemetry.agent_runs.source, e.g. tokenburn-self.</param>
 public sealed record RunsQuery(
     DateTimeOffset? From,
     DateTimeOffset? To,
@@ -15,6 +16,7 @@ public sealed record RunsQuery(
     string? Persona,
     decimal? MinCost,
     string? Cursor,
-    int Limit) : IRequest<RunsResponse>;
+    int Limit,
+    string? Source = null) : IRequest<RunsResponse>;
 
 public sealed record RunDetailQuery(Guid Id) : IRequest<RunDetailResponse?>;

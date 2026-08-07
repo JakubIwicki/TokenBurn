@@ -4,6 +4,7 @@ using Api.TokenBurn.Insights.Features.Ask.Chat;
 using Api.TokenBurn.Insights.Features.Ask.Retrieval;
 using Api.TokenBurn.Insights.Features.Costs;
 using Api.TokenBurn.Insights.Features.Findings;
+using Api.TokenBurn.Insights.Features.ModelDirectory;
 using Api.TokenBurn.Insights.Features.Runs;
 using Api.TokenBurn.Insights.Features.Search;
 using Api.TokenBurn.Insights.Persistence;
@@ -45,6 +46,10 @@ public static class ServiceHostExtensions
         builder.Services.AddSingleton(HybridRetrievalOptions.FromConfiguration(builder.Configuration));
         builder.Services.AddSingleton<HybridTracesRetrievalService>();
         AddAskServices(builder);
+        // Public model surface: the singleton cache is seeded from the durable metrics.aggregate
+        // table by the consumer (telemetry-pipeline rule 9), then kept warm from the Kafka topic.
+        builder.Services.AddSingleton<PublicAggregateCache>();
+        builder.Services.AddHostedService<MetricsAggregateConsumer>();
         AddRateLimiting(builder);
         return builder;
     }
@@ -60,6 +65,7 @@ public static class ServiceHostExtensions
         app.MapFindingsEndpoints();
         app.MapCostSummaryEndpoints();
         app.MapAskEndpoints();
+        app.MapModelsEndpoints();
         app.MapOpenApi().WithName("OpenApiDocument").RequireAuthorization(AuthorizationPolicies.InsightsRead).RequireRateLimiting("v1");
         return app;
     }

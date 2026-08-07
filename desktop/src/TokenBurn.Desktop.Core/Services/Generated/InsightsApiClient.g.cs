@@ -38,7 +38,7 @@ namespace TokenBurn.Desktop.Core.Services.Generated
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<RunsResponse> RunsAsync(System.DateTimeOffset? from = null, System.DateTimeOffset? to = null, string? model = null, string? persona = null, double? minCost = null, string? cursor = null, int? limit = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<RunsResponse> RunsAsync(System.DateTimeOffset? from = null, System.DateTimeOffset? to = null, string? model = null, string? persona = null, double? minCost = null, string? cursor = null, int? limit = null, string? source = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
@@ -226,7 +226,7 @@ namespace TokenBurn.Desktop.Core.Services.Generated
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<RunsResponse> RunsAsync(System.DateTimeOffset? from = null, System.DateTimeOffset? to = null, string? model = null, string? persona = null, double? minCost = null, string? cursor = null, int? limit = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        public virtual async System.Threading.Tasks.Task<RunsResponse> RunsAsync(System.DateTimeOffset? from = null, System.DateTimeOffset? to = null, string? model = null, string? persona = null, double? minCost = null, string? cursor = null, int? limit = null, string? source = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -269,6 +269,10 @@ namespace TokenBurn.Desktop.Core.Services.Generated
                     if (limit != null)
                     {
                         urlBuilder_.Append(System.Uri.EscapeDataString("Limit")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(limit, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (source != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("Source")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(source, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     }
                     urlBuilder_.Length--;
 

@@ -20,6 +20,7 @@ public sealed class ApiTokenBurnIdentityTests : IAsyncLifetime
 {
     private const string CollectorClientId = "tokenburn-collector";
     private const string CollectorClientSecret = "collector-secret";
+    private const string SelfTelemetryClientId = "tokenburn-self";
     private const string RequestedScope = "telemetry.write";
 
     private readonly PostgreSqlContainer _database = new PostgreSqlBuilder().Build();
@@ -110,6 +111,18 @@ public sealed class ApiTokenBurnIdentityTests : IAsyncLifetime
         Assert.Contains(response.StatusCode, new[] { HttpStatusCode.BadRequest, HttpStatusCode.Unauthorized });
         Assert.Equal("invalid_client", document.RootElement.GetProperty("error").GetString());
         Assert.False(document.RootElement.TryGetProperty("access_token", out _));
+    }
+
+    [Fact]
+    public async Task DoesNotSeedSelfTelemetryClient_WhenSecretNotConfigured()
+    {
+        using CancellationTokenSource timeout = new(TimeSpan.FromSeconds(30));
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IOpenIddictApplicationManager applications = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
+
+        object? application = await applications.FindByClientIdAsync(SelfTelemetryClientId, timeout.Token);
+
+        Assert.Null(application);
     }
 
     private async Task<HttpResponseMessage> RequestTokenAsync(string secret)

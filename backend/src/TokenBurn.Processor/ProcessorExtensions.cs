@@ -9,6 +9,7 @@ using TokenBurn.Common.Primitives;
 using TokenBurn.Common.Security;
 using TokenBurn.Contracts;
 using TokenBurn.Processor.Adapters;
+using TokenBurn.Processor.Aggregation;
 using TokenBurn.Processor.Commands;
 using TokenBurn.Processor.Documents;
 using TokenBurn.Processor.Documents.Indexing;
@@ -20,6 +21,7 @@ using TokenBurn.Processor.Infrastructure.Embeddings;
 using TokenBurn.Processor.Infrastructure.Indexing;
 using TokenBurn.Processor.Persistence;
 using TokenBurn.Processor.Pricing;
+using TokenBurn.Processor.SelfTelemetry;
 using TokenBurn.Processor.WasteDetection;
 
 namespace TokenBurn.Processor;
@@ -68,6 +70,14 @@ public static class ProcessorExtensions
         builder.Services.AddSingleton<SearchIndexTemplateInitializer>();
         builder.Services.AddSingleton<IRunIndexer, ElasticsearchRunIndexer>();
         builder.Services.AddScoped<RunReplayService>();
+        // Aggregate recompute: options + replay-completion bridge + the publisher, then the
+        // scoped upserter/rebuild service. The trigger is registered after RunReplayTrigger so it
+        // starts after replay's start (the notifier makes order-tolerant anyway).
+        builder.Services.AddSingleton(AggregateOptions.FromConfiguration(builder.Configuration));
+        builder.Services.AddSingleton<ReplayCompletionNotifier>();
+        builder.Services.AddSingleton<IAggregatePublisher, KafkaAggregatePublisher>();
+        builder.Services.AddScoped<AggregateUpserter>();
+        builder.Services.AddScoped<AggregateRebuildService>();
         // Embeddings chain: options + HttpClient + client, the text builder, and
         // the scoped embedder. The hosted consumer is registered unconditionally
         // and no-ops when Processor:Embeddings:Enabled is not true (default),
@@ -75,14 +85,23 @@ public static class ProcessorExtensions
         builder.Services.AddEmbeddingServices(builder.Configuration);
         builder.Services.AddSingleton<RunEmbeddingTextBuilder>();
         builder.Services.AddScoped<RunEmbedder>();
+        // Self-telemetry: options + the token typed client + the named ingest client, then the
+        // hosted emitter. The emitter is registered LAST (after the aggregate trigger) and is a
+        // silent no-op when SelfTelemetry:Enabled is not true (default). The ingest client is a
+        // bare named client mirroring the Collector, which builds full URIs from its config.
+        builder.Services.AddSingleton(SelfTelemetryOptions.FromConfiguration(builder.Configuration));
+        builder.Services.AddHttpClient<SelfTelemetryTokenClient>();
+        builder.Services.AddHttpClient("self-telemetry");
         // Replay first (it re-publishes agent_runs as PricedRun; the index
         // consumer is Earliest and catches up), then the live consumers.
         builder.Services.AddHostedService<RunReplayTrigger>();
+        builder.Services.AddHostedService<AggregateRebuildTrigger>();
         builder.Services.AddHostedService<TelemetryRawConsumer>();
         builder.Services.AddHostedService<PricedRunIndexConsumer>();
         builder.Services.AddHostedService<EmbeddedRunConsumer>();
         builder.Services.AddHostedService<WasteDetectionConsumer>();
         builder.Services.AddHostedService<ImportCommandWorker>();
+        builder.Services.AddHostedService<SelfTelemetryEmitter>();
         return builder;
     }
 

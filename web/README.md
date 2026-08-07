@@ -1,1 +1,3 @@
 This is the TokenBurn web frontend. The `(public)` route group is the anonymous SEO surface; the `(app)` route group is the authenticated dashboard.
+
+Two API base URLs: `API_INTERNAL_URL` is used for server-side SSR/ISR fetches (the internal compose-network address of the Insights API, e.g. `http://insights:8080`); `NEXT_PUBLIC_API_BASE_URL` stays the public origin (e.g. `https://localhost`) for client-facing URLs and metadata.

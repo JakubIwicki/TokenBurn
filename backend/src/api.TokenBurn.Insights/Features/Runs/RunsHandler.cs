@@ -23,6 +23,8 @@ public sealed class RunsHandler(InsightsDbContext db) : IRequestHandler<RunsQuer
             query = query.Where(run => run.ModelSlug == request.Model);
         if (request.Persona is not null)
             query = query.Where(run => run.Persona == request.Persona);
+        if (request.Source is not null)
+            query = query.Where(run => run.Source == request.Source);
         if (request.MinCost is not null)
             query = query.Where(run => run.CostUsd >= request.MinCost);
 

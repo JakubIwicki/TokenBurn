@@ -14,7 +14,7 @@ public sealed class RunsViewModelTests
 
         public Fixture()
         {
-            Api.Setup(a => a.RunsAsync(It.IsAny<DateTimeOffset?>(), It.IsAny<DateTimeOffset?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<double?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            Api.Setup(a => a.RunsAsync(It.IsAny<DateTimeOffset?>(), It.IsAny<DateTimeOffset?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<double?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new RunsResponse { Runs = [], NextCursor = null });
             Sut = new RunsViewModel(Dispatcher, Api.Object, Loop);
         }
@@ -37,7 +37,7 @@ public sealed class RunsViewModelTests
     public async Task Refresh_LoadsRunRowsAndCursor()
     {
         var fx = new Fixture();
-        fx.Api.Setup(a => a.RunsAsync(It.IsAny<DateTimeOffset?>(), It.IsAny<DateTimeOffset?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<double?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+        fx.Api.Setup(a => a.RunsAsync(It.IsAny<DateTimeOffset?>(), It.IsAny<DateTimeOffset?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<double?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new RunsResponse { Runs = [Run("s1"), Run("s2", 4.62)], NextCursor = "cur" });
 
         await fx.Sut.RefreshCommand.ExecuteAsync(null);
@@ -50,10 +50,28 @@ public sealed class RunsViewModelTests
     }
 
     [Fact]
+    public async Task Refresh_WhenSourceFilterSet_PassesSourceToApi()
+    {
+        var fx = new Fixture();
+        string? seenSource = null;
+        fx.Api.Setup(a => a.RunsAsync(It.IsAny<DateTimeOffset?>(), It.IsAny<DateTimeOffset?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<double?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+            .Returns((DateTimeOffset? from, DateTimeOffset? to, string? model, string? persona, double? minCost, string? cursor, int? limit, string? source, CancellationToken ct) =>
+            {
+                seenSource = source;
+                return Task.FromResult(new RunsResponse { Runs = [], NextCursor = null });
+            });
+        fx.Sut.SourceFilter = "tokenburn-self";
+
+        await fx.Sut.RefreshCommand.ExecuteAsync(null);
+
+        seenSource.Should().Be("tokenburn-self");
+    }
+
+    [Fact]
     public async Task Refresh_WhenApiThrows_SetsErrorMessage()
     {
         var fx = new Fixture();
-        fx.Api.Setup(a => a.RunsAsync(It.IsAny<DateTimeOffset?>(), It.IsAny<DateTimeOffset?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<double?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+        fx.Api.Setup(a => a.RunsAsync(It.IsAny<DateTimeOffset?>(), It.IsAny<DateTimeOffset?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<double?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("boom"));
 
         await fx.Sut.RefreshCommand.ExecuteAsync(null);
@@ -65,8 +83,8 @@ public sealed class RunsViewModelTests
     public async Task Refresh_WhenCancelled_LeavesRowsUntouched()
     {
         var fx = new Fixture();
-        fx.Api.Setup(a => a.RunsAsync(It.IsAny<DateTimeOffset?>(), It.IsAny<DateTimeOffset?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<double?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .Returns((DateTimeOffset? from, DateTimeOffset? to, string? model, string? persona, double? minCost, string? cursor, int? limit, CancellationToken ct) =>
+        fx.Api.Setup(a => a.RunsAsync(It.IsAny<DateTimeOffset?>(), It.IsAny<DateTimeOffset?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<double?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+            .Returns((DateTimeOffset? from, DateTimeOffset? to, string? model, string? persona, double? minCost, string? cursor, int? limit, string? source, CancellationToken ct) =>
             {
                 var tcs = new TaskCompletionSource<RunsResponse>();
                 ct.Register(() => tcs.TrySetCanceled());
@@ -85,8 +103,8 @@ public sealed class RunsViewModelTests
     public async Task LoadMore_AppendsRowsAndAdvancesCursor()
     {
         var fx = new Fixture();
-        fx.Api.Setup(a => a.RunsAsync(It.IsAny<DateTimeOffset?>(), It.IsAny<DateTimeOffset?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<double?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .Returns((DateTimeOffset? from, DateTimeOffset? to, string? model, string? persona, double? minCost, string? cursor, int? limit, CancellationToken ct) =>
+        fx.Api.Setup(a => a.RunsAsync(It.IsAny<DateTimeOffset?>(), It.IsAny<DateTimeOffset?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<double?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+            .Returns((DateTimeOffset? from, DateTimeOffset? to, string? model, string? persona, double? minCost, string? cursor, int? limit, string? source, CancellationToken ct) =>
                 cursor is null
                     ? Task.FromResult(new RunsResponse { Runs = [Run("s1")], NextCursor = "cur" })
                     : Task.FromResult(new RunsResponse { Runs = [Run("s2")], NextCursor = null }));

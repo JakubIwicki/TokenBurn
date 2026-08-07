@@ -146,12 +146,14 @@ public sealed class EndpointAuthorizationTests
             },
             a => InsightsServiceHost.MapDefaultEndpoints(a));
 
-        // `/api/models` (anonymous model directory, privacy-boundary.md rule 8)
-        // joins this list in Phase 8 when the endpoint exists.
+        // Two anonymous model endpoints (privacy-boundary.md rule 8): the model directory
+        // and its aggregate stats, both allow-listed as the single commented public surface.
         var allowList = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "/health", // liveness probe consumed anonymously by container healthchecks (docker-compose.yml)
-            "/health/ready" // readiness probe consumed anonymously by container healthchecks (docker-compose.yml)
+            "/health/ready", // readiness probe consumed anonymously by container healthchecks (docker-compose.yml)
+            "/api/models", // anonymous model directory (privacy-boundary.md rule 8)
+            "/api/models/stats" // anonymous per-model aggregate stats (privacy-boundary.md rule 8)
         };
 
         ICollection<EndpointDataSource> dataSources = ((IEndpointRouteBuilder)app).DataSources;
@@ -170,7 +172,9 @@ public sealed class EndpointAuthorizationTests
         // 7 -> 8 is deliberate: /api/costs/summary was added in Phase 7 Part A2.
         // 8 -> 9 is deliberate: /api/ask was added in Phase 5 Slice D (ask is authed, so no
         // allow-list entry is added).
-        const int expectedScannedPairCount = 9;
+        // 9 -> 11 is deliberate: Phase 8 added /api/models and /api/models/stats, both
+        // anonymous model endpoints allow-listed above (privacy-boundary.md rule 8).
+        const int expectedScannedPairCount = 11;
         result.ScannedCount.Should().Be(expectedScannedPairCount,
             $"the authorization convention must scan exactly {expectedScannedPairCount} method+pattern pairs " +
             $"(one per mapped endpoint); a count drop means endpoints escaped the scan");

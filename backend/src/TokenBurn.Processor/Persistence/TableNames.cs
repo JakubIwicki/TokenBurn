@@ -11,4 +11,6 @@ public static class TableNames
     public const string SearchSchema = "search";
     public const string SearchDocuments = "documents";
     public const string SearchDocumentChunks = "document_chunks";
+    public const string MetricsSchema = "metrics";
+    public const string MetricAggregates = "aggregate";
 }
